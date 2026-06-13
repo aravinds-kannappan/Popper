@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "popper-spec"
+version = "0.1.0"
+description = "Falsify the spec, then verify the proof — an executable spec-faithfulness oracle for math and code, built on AXLE."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Aravind Kannappan" }]
+keywords = ["formal-methods", "lean", "autoformalization", "specification", "verification", "axiom", "axle", "verina"]
+dependencies = []  # core is pure standard library by design
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.urls]
+Homepage = "https://axle.axiommath.ai"
+Proposal = "PROPOSAL.md"
+
+[project.scripts]
+popper-audit-math = "examples.audit_math:main"
+popper-audit-code = "examples.audit_verina:main"
+
+[tool.setuptools]
+packages = ["popper"]
