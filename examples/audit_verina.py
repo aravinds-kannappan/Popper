@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
-"""Audit Verina-style code specifications with the code-spec oracle.
-
-Offline (default): evaluates an executable model of each task via MockAxleClient.
+"""Code-spec oracle on offline Verina-style fixtures (executable model, no network).
 
     python examples/audit_verina.py
     python examples/audit_verina.py --markdown > reports/verina_audit.md
 
-Live: with `AXLE_API_KEY` set, `--live` routes every soundness/completeness check
-through the real Axiom Lean Engine instead of the offline model.
-
-    export AXLE_API_KEY=...        # free key: https://axle.axiommath.ai/app/console
-    python examples/audit_verina.py --live
+For the LIVE audit of the real 189-task Verina benchmark over the Axiom Lean
+Engine, see `examples/verina_live_audit.py`.
 """
 
 import argparse
@@ -25,21 +20,12 @@ from popper import CodeSpecOracle, MockAxleClient, run_audit, verina_like_tasks 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--markdown", action="store_true")
-    ap.add_argument("--live", action="store_true", help="use the real AXLE API (needs AXLE_API_KEY)")
     args = ap.parse_args()
 
-    if args.live:
-        from popper import AxleClient
-        client = AxleClient()  # raises a helpful error if AXLE_API_KEY is unset
-        backend = "live AXLE"
-    else:
-        client = MockAxleClient()
-        backend = "offline model (MockAxleClient)"
-
-    oracle = CodeSpecOracle(client)
+    oracle = CodeSpecOracle(MockAxleClient())
     report = run_audit(
         verina_like_tasks(), oracle,
-        title=f"Code-spec oracle — Verina-style tasks [{backend}]",
+        title="Code-spec oracle — Verina-style fixtures [offline model]",
     )
     print(report.render_markdown() if args.markdown else report.render_terminal())
     return 0

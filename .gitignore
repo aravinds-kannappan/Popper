@@ -21,3 +21,6 @@ venv/
 
 # Local Claude Code settings (machine-local)
 .claude/
+
+# Verina dataset cache (CC-BY-SA-4.0 — fetched on demand, never vendored)
+.verina_cache/

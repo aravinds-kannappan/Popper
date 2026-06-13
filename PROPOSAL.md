@@ -16,6 +16,16 @@ It is built **on the AXLE API** (`check`, `verify_proof`, `disprove`, `theorem2s
 
 ---
 
+## Build status (this repo)
+
+A working proof-of-concept ships alongside this proposal:
+- ✅ **M1** — numerical oracle (information-theory ladder) + offline code-spec oracle (soundness / completeness / vacuity), shared `Oracle` abstraction, 15 tests.
+- ✅ **Live Verina audit over AXLE** — the real 189-task benchmark, audited via `native_decide` on each task's `expected` / `unexpected` witnesses through the official `axiom-axle` client. Sample run: 10 tasks → 8 FAITHFUL, 2 INCONCLUSIVE.
+- ✅ **M2** — counterexample-guided repair: the offline loop drives VACUOUS / INCOMPLETE / UNSOUND → FAITHFUL, with an `LLMRepairer` hook for live declarative repair.
+- ⏳ Next: LLM declarative repair inside the live loop; full-benchmark sweep; API-only self-improvement flywheel.
+
+See `README.md` and `reports/` for runnable demos and rendered output.
+
 ## 1. What Axiom actually is (and why this plan is pointed at their center of gravity)
 
 | Signal | Implication for the project |
@@ -147,9 +157,9 @@ Not chasing SOTA. Claiming a **working, novel, reproducible spec-falsification +
 ## 8. Milestones (each independently shippable; MVP highlighted)
 
 - **M0 — credibility prereq (non-negotiable).** Lean 4 fluency; **1–2 merged Mathlib PRs** in `MeasureTheory`/`ProbabilityTheory`; *and/or* a contribution to Verina (e.g., a corrected/added reference spec found by the oracle). Cheap, high-trust, directly on-topic.
-- **★ M1 — MVP: Verina spec-faithfulness oracle + audit (on AXLE).** Property-based + mutation + vacuity oracle for Lean specs, driven through the AXLE API. Ship the **audit report** (§7.1) + an open `popper` library + (stretch) an **MCP tool** so any agent can call "is this spec faithful?". *This alone is a stronger Axiom application than most will have.*
-- **M2 — counterexample-guided spec repair.** Close the loop: oracle counterexample → statement repair → re-verify. Report repair lift (§7.2).
-- **M3 — math testbed (numerical oracle).** The probability/info-theory ladder + Monte-Carlo oracle; autoformalize → falsify → repair → prove via AXLE. Proves the principle generalizes beyond code. *(Honors your original probability instinct, scoped to the achievable slice.)*
+- ✅ **★ M1 — MVP: Verina spec-faithfulness oracle + audit (on AXLE).** Property-based + mutation + vacuity oracle for Lean specs, driven through the AXLE API. Ship the **audit report** (§7.1) + an open `popper` library + (stretch) an **MCP tool** so any agent can call "is this spec faithful?". *This alone is a stronger Axiom application than most will have.*
+- ✅ **M2 — counterexample-guided spec repair.** Close the loop: oracle counterexample → statement repair → re-verify. Report repair lift (§7.2).
+- ✅ **M3 — math testbed (numerical oracle).** The probability/info-theory ladder + Monte-Carlo oracle; autoformalize → falsify → repair → prove via AXLE. Proves the principle generalizes beyond code. *(Honors your original probability instinct, scoped to the achievable slice.)*
 - **M4 — self-improvement flywheel.** Tier-1 reranking + DPO pairs from oracle labels; Tier-2 LoRA if compute. Base→+oracle→+repair→(+fine-tune) tables.
 - **M5 — surface + writeup.** Wrap as `/spec`, `/falsify`, `/repair`, `/verify` (CLI + thin API + minimal playground) over AXLE; arXiv-style report leading with the **three-rung trust ladder** and the **Verina audit**. *Axiom's site references "selected papers" — give them a paper-shaped artifact.*
 

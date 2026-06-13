@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "popper-spec"
-version = "0.1.0"
+version = "0.2.0"
 description = "Falsify the spec, then verify the proof — an executable spec-faithfulness oracle for math and code, built on AXLE."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -14,6 +14,8 @@ keywords = ["formal-methods", "lean", "autoformalization", "specification", "ver
 dependencies = []  # core is pure standard library by design
 
 [project.optional-dependencies]
+live = ["axiom-axle"]      # live AXLE audit (Lean checking over the API)
+llm = ["anthropic"]        # LLM-driven declarative spec repair (M2 → live)
 dev = ["pytest"]
 
 [project.urls]
@@ -23,6 +25,8 @@ Proposal = "PROPOSAL.md"
 [project.scripts]
 popper-audit-math = "examples.audit_math:main"
 popper-audit-code = "examples.audit_verina:main"
+popper-repair = "examples.repair_demo:main"
+popper-verina-live = "examples.verina_live_audit:main"
 
 [tool.setuptools]
 packages = ["popper"]

@@ -1,33 +1,21 @@
-"""Backend for the code-specification oracle.
+"""Backends for the code-specification oracle.
 
-Two pieces live here:
+* :class:`Task` — a Verina-style task carrying executable Python models (for the
+  offline demo) alongside optional Lean artifacts.
+* :class:`MockAxleClient` — offline evaluator of the Python model.
+* :class:`AxleClient` — a thin *synchronous* wrapper over the official async
+  ``axle.AxleClient`` (``pip install axiom-axle``). The official package is
+  imported lazily inside ``__init__`` so that ``import popper`` never requires it;
+  only the live path does.
 
-* :class:`Task` — a Verina-style verifiable-coding task. It carries the Lean
-  artifacts (signature, reference implementation, candidate specs, mutant
-  implementations) *and*, for offline runs, executable Python models of each, so
-  the oracle's decision logic can be exercised without a Lean toolchain.
-
-* The AXLE backends, both exposing one primitive:
-  ``spec_satisfied(task, impl, spec) -> SpecCheckResult``.
-    - :class:`AxleClient` talks to the real Axiom Lean Engine over HTTP (stdlib
-      ``urllib`` only). It reads ``AXLE_API_KEY`` from the environment. This is
-      the live path; it builds a Lean obligation and uses AXLE's ``disprove`` /
-      ``check`` verbs to look for a counterexample.
-    - :class:`MockAxleClient` *evaluates the task's Python model* over the test
-      inputs plus fuzzed inputs. It is a real evaluator of the modelled
-      semantics — only the bridge to genuine Lean is stubbed — so the audit
-      numbers it produces are real with respect to that model.
-
-The oracle code in :mod:`popper.codespec` is identical regardless of backend.
+The live Verina audit (see :mod:`popper.verina`) drives the official async client
+directly for concurrency; this sync wrapper is the convenient general-purpose
+handle (``check`` / ``disprove``).
 """
 
 from __future__ import annotations
 
-import json
-import os
 import random
-import urllib.error
-import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
@@ -36,7 +24,7 @@ Args = tuple
 
 @dataclass
 class Task:
-    """A verifiable-coding task (Verina format)."""
+    """A verifiable-coding task (Verina format) with an executable model."""
 
     name: str
     description: str
@@ -49,14 +37,13 @@ class Task:
     gen_input: Callable[[random.Random], Args]
     wrong_impls: list[str] = field(default_factory=list)   # known-incorrect impls (mutants)
     arbitrary: Optional[str] = None             # an "anything goes" impl; if it passes ⇒ vacuous
-    lean: dict[str, str] = field(default_factory=dict)     # optional Lean source (live path)
+    lean: dict[str, str] = field(default_factory=dict)     # optional Lean source (display/live)
     fuzz_n: int = 200
 
     def output(self, impl: str, args: Args) -> Any:
         return self.impls_py[impl](*args)
 
     def differs_from_reference(self, impl: str, inputs: list[Args]) -> Optional[Args]:
-        """First input where ``impl`` disagrees with the reference (proof it is wrong)."""
         for a in inputs:
             if self.impls_py[impl](*a) != self.impls_py[self.reference](*a):
                 return a
@@ -95,94 +82,58 @@ class MockAxleClient:
 
 
 class AxleClient:
-    """Live backend talking to the Axiom Lean Engine (https://axle.axiommath.ai).
+    """Synchronous handle on the live Axiom Lean Engine.
 
-    Network calls only happen when a method is invoked, so importing this module
-    never requires connectivity. Get a free key at
-    https://axle.axiommath.ai/app/console and ``export AXLE_API_KEY=...``.
+    Requires ``pip install axiom-axle`` and an API key (``AXLE_API_KEY`` env var,
+    free key at https://axle.axiommath.ai/app/console).
     """
 
     live = True
-    DEFAULT_BASE = "https://axle.axiommath.ai/v1"
 
-    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None,
-                 timeout: int = 120):
-        self.api_key = api_key or os.environ.get("AXLE_API_KEY")
-        self.base_url = (base_url or os.environ.get("AXLE_BASE_URL") or self.DEFAULT_BASE).rstrip("/")
-        self.timeout = timeout
-        self._cache: dict = {}
-        if not self.api_key:
-            raise RuntimeError(
-                "AxleClient needs an API key. Set AXLE_API_KEY "
-                "(free key at https://axle.axiommath.ai/app/console), "
-                "or use MockAxleClient for the offline demo."
-            )
-
-    # -- raw API verbs (mirror the AXLE docs) ------------------------------- #
-    def _post(self, endpoint: str, payload: dict) -> dict:
-        key = (endpoint, json.dumps(payload, sort_keys=True))
-        if key in self._cache:
-            return self._cache[key]
-        data = json.dumps(payload).encode()
-        req = urllib.request.Request(
-            f"{self.base_url}/{endpoint.lstrip('/')}",
-            data=data,
-            headers={"Content-Type": "application/json",
-                     "Authorization": f"Bearer {self.api_key}"},
-            method="POST",
-        )
+    def __init__(self, api_key: Optional[str] = None, url: Optional[str] = None,
+                 environment: str = "lean-4.28.0", max_concurrency: int = 8,
+                 timeout_seconds: float = 200.0):
+        import asyncio
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                out = json.loads(resp.read().decode())
-        except urllib.error.HTTPError as e:  # surface AXLE's message
-            raise RuntimeError(f"AXLE {endpoint} HTTP {e.code}: {e.read().decode()[:300]}") from e
-        self._cache[key] = out
-        return out
+            import axle as _axle
+        except ImportError as e:  # pragma: no cover - exercised only on the live path
+            raise RuntimeError(
+                "The live path needs the official client: pip install axiom-axle"
+            ) from e
+        self._axle = _axle
+        self.environment = environment
+        self.timeout_seconds = timeout_seconds
+        self._loop = asyncio.new_event_loop()
+        self._client = self._loop.run_until_complete(
+            _axle.AxleClient(api_key=api_key, url=url, max_concurrency=max_concurrency).__aenter__()
+        )
 
-    def check(self, code: str) -> dict:
-        """`check`: compile Lean code and report errors."""
-        return self._post("check", {"code": code})
+    # -- lifecycle ---------------------------------------------------------- #
+    def close(self) -> None:
+        try:
+            self._loop.run_until_complete(self._client.__aexit__(None, None, None))
+        finally:
+            self._loop.close()
 
-    def verify_proof(self, statement: str, proof: str) -> dict:
-        """`verify_proof`: validate a proof against a formal statement."""
-        return self._post("verify_proof", {"statement": statement, "proof": proof})
+    def __enter__(self) -> "AxleClient":
+        return self
 
-    def disprove(self, theorem: str) -> dict:
-        """`disprove`: attempt to find a counterexample to a theorem."""
-        return self._post("disprove", {"theorem": theorem})
+    def __exit__(self, *exc) -> None:
+        self.close()
 
-    def theorem2sorry(self, code: str) -> dict:
-        """`theorem2sorry`: strip proofs, leaving just the statements."""
-        return self._post("theorem2sorry", {"code": code})
+    # -- verbs -------------------------------------------------------------- #
+    def check(self, content: str, ignore_imports: Optional[bool] = None,
+              timeout_seconds: Optional[float] = None):
+        return self._loop.run_until_complete(self._client.check(
+            content=content, environment=self.environment,
+            ignore_imports=ignore_imports,
+            timeout_seconds=timeout_seconds or self.timeout_seconds,
+        ))
 
-    # -- the oracle primitive ---------------------------------------------- #
-    def spec_satisfied(self, task: Task, impl: str, spec: Optional[str] = None) -> SpecCheckResult:
-        """Does ``impl`` satisfy ``spec`` for every valid input?
-
-        Live strategy: build the obligation ``∀ inputs, precond → postcond(impl
-        inputs)`` from the task's Lean artifacts and ask AXLE to ``disprove`` it.
-        A returned counterexample ⇒ not satisfied; no counterexample within
-        budget ⇒ treated as satisfied (a falsifier, never a certifier).
-        """
-        spec_name = spec or task.spec
-        obligation = _build_obligation(task, impl, spec_name)
-        result = self.disprove(obligation)
-        if result.get("disproved") or result.get("counterexample"):
-            return SpecCheckResult(
-                satisfied=False,
-                counterexample={"axle": result.get("counterexample")},
-                detail=f"AXLE disproved obligation for impl '{impl}' vs spec '{spec_name}'",
-            )
-        return SpecCheckResult(satisfied=True, detail="no counterexample found by AXLE")
-
-
-def _build_obligation(task: Task, impl: str, spec_name: str) -> str:
-    """Assemble the Lean obligation string for the live `disprove` call."""
-    impl_src = task.lean.get(f"impl::{impl}", f"-- TODO impl {impl}")
-    spec_src = task.lean.get(f"spec::{spec_name}", f"-- TODO spec {spec_name}")
-    return "\n".join([
-        task.lean.get("preamble", "import Mathlib"),
-        impl_src,
-        spec_src,
-        f"theorem obligation : ∀ x, {spec_name}_pre x → {spec_name}_post x ({impl} x) := by intro x; sorry",
-    ])
+    def disprove(self, content: str, ignore_imports: Optional[bool] = None,
+                 timeout_seconds: Optional[float] = None):
+        return self._loop.run_until_complete(self._client.disprove(
+            content=content, environment=self.environment,
+            ignore_imports=ignore_imports,
+            timeout_seconds=timeout_seconds or self.timeout_seconds,
+        ))

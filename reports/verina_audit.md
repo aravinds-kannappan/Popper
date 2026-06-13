@@ -1,4 +1,4 @@
-# Code-spec oracle — Verina-style tasks [offline model (MockAxleClient)]
+# Code-spec oracle — Verina-style fixtures [offline model]
 
 _oracle: `codespec` — 4 claims | ✓ FAITHFUL 1  ✗ UNSOUND 1  ✗ INCOMPLETE 1  ✗ VACUOUS 1_
 
