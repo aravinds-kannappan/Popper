@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "popper-spec"
-version = "0.2.0"
-description = "Falsify the spec, then verify the proof — an executable spec-faithfulness oracle for math and code, built on AXLE."
+name = "falsify"
+version = "0.3.0"
+description = "Popper — falsify the spec, then verify the proof. An executable spec-faithfulness oracle for math and code, built on AXLE."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
@@ -19,14 +19,14 @@ llm = ["anthropic"]        # LLM-driven declarative spec repair (M2 → live)
 dev = ["pytest"]
 
 [project.urls]
-Homepage = "https://axle.axiommath.ai"
-Proposal = "PROPOSAL.md"
+Repository = "https://github.com/aravinds-kannappan/Popper"
+AXLE = "https://axle.axiommath.ai"
 
 [project.scripts]
-popper-audit-math = "examples.audit_math:main"
-popper-audit-code = "examples.audit_verina:main"
-popper-repair = "examples.repair_demo:main"
-popper-verina-live = "examples.verina_live_audit:main"
+falsify-audit-math = "examples.audit_math:main"
+falsify-audit-code = "examples.audit_verina:main"
+falsify-repair = "examples.repair_demo:main"
+falsify-verina-live = "examples.verina_live_audit:main"
 
-[tool.setuptools]
-packages = ["popper"]
+[tool.setuptools.packages.find]
+include = ["falsify*"]

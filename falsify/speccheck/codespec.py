@@ -1,6 +1,6 @@
 """The code-specification falsification oracle.
 
-Given a Verina-style :class:`~popper.axle.Task` and any AXLE backend, decide
+Given a Verina-style :class:`~falsify.speccheck.task.Task` and any AXLE backend, decide
 whether the task's specification is *faithful* — i.e. neither too strong nor too
 weak — using three independent, executable checks:
 
@@ -21,8 +21,8 @@ from __future__ import annotations
 
 from typing import Optional
 
-from .axle import Task
-from .oracle import Oracle, OracleResult, Verdict
+from .task import Task
+from ..core.oracle import Oracle, OracleResult, Verdict
 
 
 class CodeSpecOracle(Oracle):

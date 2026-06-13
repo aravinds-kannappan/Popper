@@ -18,7 +18,7 @@ for real. We do NOT vendor the CC-BY-SA data into this Apache-2.0 repo.
 
 from __future__ import annotations
 
-from .axle import Task
+from .task import Task
 from .mutation import fuzz_int, fuzz_list_int
 
 

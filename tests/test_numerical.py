@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from popper import NumericalOracle, information_theory_library, Verdict
+from falsify import NumericalOracle, information_theory_library, Verdict
 
 
 class TestNumericalOracle(unittest.TestCase):

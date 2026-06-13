@@ -29,7 +29,7 @@ import random
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-from .oracle import Oracle, OracleResult, Verdict
+from ..core.oracle import Oracle, OracleResult, Verdict
 
 EPS = 1e-9
 Instance = dict

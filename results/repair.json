@@ -1,0 +1,32 @@
+{
+  "results": [
+    {
+      "task": "sort_by_length",
+      "verdict_path": "VACUOUS -> FAITHFUL",
+      "rounds": 2,
+      "final": "FAITHFUL",
+      "repaired": true
+    },
+    {
+      "task": "max_lower_bound_only",
+      "verdict_path": "INCOMPLETE -> FAITHFUL",
+      "rounds": 2,
+      "final": "FAITHFUL",
+      "repaired": true
+    },
+    {
+      "task": "abs_value",
+      "verdict_path": "FAITHFUL",
+      "rounds": 1,
+      "final": "FAITHFUL",
+      "repaired": false
+    },
+    {
+      "task": "abs_strictly_positive",
+      "verdict_path": "UNSOUND -> FAITHFUL",
+      "rounds": 2,
+      "final": "FAITHFUL",
+      "repaired": true
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "title": "Code-spec oracle \u2014 offline fixtures",
+  "oracle": "codespec",
+  "summary": {
+    "VACUOUS": 1,
+    "INCOMPLETE": 1,
+    "FAITHFUL": 1,
+    "UNSOUND": 1
+  },
+  "faithful_rate": 0.25,
+  "results": [
+    {
+      "name": "sort_by_length",
+      "verdict": "VACUOUS",
+      "reason": "spec constrains nothing \u2014 even the throwaway impl 'all_zeros' satisfies it",
+      "counterexample": "impl 'all_zeros' passes; spec fails to pin down the answer",
+      "trials": 2,
+      "check": "vacuity"
+    },
+    {
+      "name": "max_lower_bound_only",
+      "verdict": "INCOMPLETE",
+      "reason": "spec is too weak \u2014 the wrong impl 'max_plus_one' satisfies it yet disagrees with the reference",
+      "counterexample": "impl 'max_plus_one' passes the spec; differs from reference at input (3, 5)",
+      "trials": 3,
+      "check": "completeness",
+      "mutant": "max_plus_one"
+    },
+    {
+      "name": "abs_value",
+      "verdict": "FAITHFUL",
+      "reason": "reference passes; no wrong implementation slips through; not vacuous",
+      "counterexample": "",
+      "trials": 4,
+      "check": "all"
+    },
+    {
+      "name": "abs_strictly_positive",
+      "verdict": "UNSOUND",
+      "reason": "spec is too strong \u2014 it rejects the correct reference implementation",
+      "counterexample": "reference fails spec at input (0,) (\u2192 output 0)",
+      "trials": 1,
+      "check": "soundness"
+    }
+  ]
+}

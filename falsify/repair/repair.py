@@ -24,8 +24,8 @@ import os
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-from .axle import Task
-from .oracle import GLYPH, OracleResult, Verdict
+from ..speccheck.task import Task
+from ..core.oracle import GLYPH, OracleResult, Verdict
 
 
 # --------------------------------------------------------------------------- #

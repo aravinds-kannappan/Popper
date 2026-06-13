@@ -7,7 +7,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from popper.mutation import available_ops, fuzz_int, fuzz_list_int, mutate
+from falsify.speccheck.mutation import available_ops, fuzz_int, fuzz_list_int, mutate
 
 
 class TestMutation(unittest.TestCase):

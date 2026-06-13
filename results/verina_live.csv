@@ -1,0 +1,11 @@
+name,verdict,reason,counterexample,trials
+verina_advanced_1,FAITHFUL,correct outputs accepted; all wrong outputs rejected (on test witnesses),,6
+verina_advanced_10,INCONCLUSIVE,spec not decidable on some witnesses (no Decidable instance / timeout),,6
+verina_advanced_11,FAITHFUL,correct outputs accepted; all wrong outputs rejected (on test witnesses),,6
+verina_advanced_12,FAITHFUL,correct outputs accepted; all wrong outputs rejected (on test witnesses),,6
+verina_advanced_13,FAITHFUL,correct outputs accepted; all wrong outputs rejected (on test witnesses),,4
+verina_advanced_14,INCONCLUSIVE,spec not decidable on some witnesses (no Decidable instance / timeout),,4
+verina_advanced_15,FAITHFUL,correct outputs accepted; all wrong outputs rejected (on test witnesses),,4
+verina_advanced_16,FAITHFUL,correct outputs accepted; all wrong outputs rejected (on test witnesses),,6
+verina_advanced_17,FAITHFUL,correct outputs accepted; all wrong outputs rejected (on test witnesses),,6
+verina_advanced_18,FAITHFUL,correct outputs accepted; all wrong outputs rejected (on test witnesses),,4

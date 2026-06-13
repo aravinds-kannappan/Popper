@@ -1,0 +1,68 @@
+{
+  "title": "Numerical oracle \u2014 information-theory ladder",
+  "oracle": "numerical",
+  "summary": {
+    "FAITHFUL": 3,
+    "FALSIFIED": 3,
+    "INCONCLUSIVE": 1
+  },
+  "faithful_rate": 0.4286,
+  "results": [
+    {
+      "name": "kl_nonneg",
+      "verdict": "FAITHFUL",
+      "reason": "survived 2000 Monte-Carlo draws (2000 with hypothesis active)",
+      "counterexample": "",
+      "trials": 2000,
+      "hypothesis_hits": 2000
+    },
+    {
+      "name": "kl_nonneg_DROPPED_normalization",
+      "verdict": "FALSIFIED",
+      "reason": "counterexample found; the formalized statement is false as written",
+      "counterexample": "q=[0.777, 1.534, 1.215] (\u03a3q=3.525\u22601) \u21d2 \u03a3 p\u1d62\u00b7log(p\u1d62/q\u1d62) = -1.1543 < 0",
+      "trials": 1,
+      "hypothesis_hits": 1
+    },
+    {
+      "name": "data_processing",
+      "verdict": "FAITHFUL",
+      "reason": "survived 2000 Monte-Carlo draws (2000 with hypothesis active)",
+      "counterexample": "",
+      "trials": 2000,
+      "hypothesis_hits": 2000
+    },
+    {
+      "name": "data_processing_DROPPED_markov",
+      "verdict": "FALSIFIED",
+      "reason": "counterexample found; the formalized statement is false as written",
+      "counterexample": "I(X;Z) = 0.8318 > I(X;Y) = 0.0478  (Z leaks X directly)",
+      "trials": 1,
+      "hypothesis_hits": 1
+    },
+    {
+      "name": "entropy_concave",
+      "verdict": "FAITHFUL",
+      "reason": "survived 2000 Monte-Carlo draws (2000 with hypothesis active)",
+      "counterexample": "",
+      "trials": 2000,
+      "hypothesis_hits": 2000
+    },
+    {
+      "name": "entropy_concave_WRONG_direction",
+      "verdict": "FALSIFIED",
+      "reason": "counterexample found; the formalized statement is false as written",
+      "counterexample": "H(\u03bbp+(1-\u03bb)q) = 1.0797 > \u03bbH(p)+(1-\u03bb)H(q) = 1.0600  (entropy is concave, not convex)",
+      "trials": 1,
+      "hypothesis_hits": 1
+    },
+    {
+      "name": "entropy_uniform_vacuous_guard",
+      "verdict": "INCONCLUSIVE",
+      "reason": "hypothesis satisfied in 0/2000 draws \u2014 conclusion never exercised (possibly vacuous)",
+      "counterexample": "",
+      "trials": 2000,
+      "hypothesis_hits": 0
+    }
+  ]
+}

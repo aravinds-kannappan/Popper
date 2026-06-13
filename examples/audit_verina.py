@@ -14,7 +14,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from popper import CodeSpecOracle, MockAxleClient, run_audit, verina_like_tasks  # noqa: E402
+from falsify import CodeSpecOracle, MockAxleClient, run_audit, verina_like_tasks  # noqa: E402
 
 
 def main() -> int:

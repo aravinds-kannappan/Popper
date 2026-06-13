@@ -25,12 +25,12 @@ import os
 import subprocess
 from dataclasses import dataclass, field
 
-from .audit import AuditReport
-from .oracle import OracleResult, Verdict
+from ..core.audit import AuditReport
+from ..core.oracle import OracleResult, Verdict
 
 REPO_RAW = "https://raw.githubusercontent.com/sunblaze-ucb/verina/main/datasets/verina"
 TREE_API = "https://api.github.com/repos/sunblaze-ucb/verina/git/trees/HEAD?recursive=1"
-DEFAULT_CACHE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".verina_cache")
+DEFAULT_CACHE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".verina_cache")
 PROOF_MARKER = "-- !benchmark @start proof_aux"
 
 
@@ -85,7 +85,7 @@ class VerinaTask:
     def probe(self, input_dict: dict, value) -> str:
         args = " ".join(f"({input_dict[p]})" for p in self.params)
         return (f"import Mathlib\n{self.prelude}\n"
-                f"theorem popper_probe : {self.postcond_name} {args} ({_lean(value)}) "
+                f"theorem faithfulness_probe : {self.postcond_name} {args} ({_lean(value)}) "
                 f"(by native_decide) := by native_decide\n")
 
 
@@ -187,6 +187,17 @@ def _decide(task: VerinaTask, sound, comp, n_probes: int) -> OracleResult:
                         trials=n_probes, details={"check": "inconclusive"})
 
 
+def _run_async(coro):
+    """Run a coroutine, working both standalone and inside a live loop (Jupyter)."""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)               # no running loop (CLI/script)
+    import concurrent.futures                   # running loop: hand off to a worker thread
+    with concurrent.futures.ThreadPoolExecutor(1) as ex:
+        return ex.submit(asyncio.run, coro).result()
+
+
 def run_live_audit(task_ids: list[str] | None = None, *, limit: int | None = None,
                    environment: str = "lean-4.28.0", concurrency: int = 8,
                    max_tests: int = 2, max_unexpected: int = 2, timeout_s: float = 200.0,
@@ -196,7 +207,7 @@ def run_live_audit(task_ids: list[str] | None = None, *, limit: int | None = Non
     if limit is not None:
         ids = ids[:limit]
     tasks = [load_task(i, cache_dir) for i in ids]
-    return asyncio.run(_audit_async(
+    return _run_async(_audit_async(
         tasks, environment=environment, concurrency=concurrency, max_tests=max_tests,
         max_unexpected=max_unexpected, timeout_s=timeout_s, api_key=api_key, progress=progress,
     ))

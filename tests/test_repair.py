@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from popper import (CodeSpecOracle, FunctionalSpecRepairer, MockAxleClient,
+from falsify import (CodeSpecOracle, FunctionalSpecRepairer, MockAxleClient,
                     default_repairer, repair_loop, verina_like_tasks, Verdict)
 
 UNFAITHFUL = {"sort_by_length", "max_lower_bound_only", "abs_strictly_positive"}

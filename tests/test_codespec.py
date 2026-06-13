@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from popper import CodeSpecOracle, MockAxleClient, verina_like_tasks, Verdict
+from falsify import CodeSpecOracle, MockAxleClient, verina_like_tasks, Verdict
 
 EXPECTED = {
     "sort_by_length": Verdict.VACUOUS,

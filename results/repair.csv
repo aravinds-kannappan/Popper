@@ -1,0 +1,5 @@
+task,verdict_path,rounds,final,repaired
+sort_by_length,VACUOUS -> FAITHFUL,2,FAITHFUL,True
+max_lower_bound_only,INCOMPLETE -> FAITHFUL,2,FAITHFUL,True
+abs_value,FAITHFUL,1,FAITHFUL,False
+abs_strictly_positive,UNSOUND -> FAITHFUL,2,FAITHFUL,True

@@ -1,11 +1,14 @@
 """Run an oracle over a batch of claims and render a report.
 
 Surface-agnostic: it works for math statements and code specs identically,
-because both produce :class:`~popper.oracle.OracleResult`.
+because both produce :class:`~falsify.core.oracle.OracleResult`.
 """
 
 from __future__ import annotations
 
+import csv
+import json
+import os
 from collections import Counter
 from dataclasses import dataclass, field
 
@@ -60,6 +63,40 @@ class AuditReport:
         head = f"\n=== {self.title} ===\n{self.summary_line()}\n"
         body = "\n".join(r.one_line() for r in self.results)
         return head + body + "\n"
+
+    # -- machine-readable export ------------------------------------------- #
+    def to_records(self) -> list[dict]:
+        return [
+            {"name": r.name, "verdict": r.verdict.value, "reason": r.reason,
+             "counterexample": r.counterexample or "", "trials": r.trials,
+             **{k: v for k, v in r.details.items()}}
+            for r in self.results
+        ]
+
+    def to_dict(self) -> dict:
+        return {
+            "title": self.title,
+            "oracle": self.oracle_name,
+            "summary": {v.value: c for v, c in self.counts.items()},
+            "faithful_rate": round(self.faithful_rate, 4),
+            "results": self.to_records(),
+        }
+
+    def write_json(self, path: str) -> str:
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        with open(path, "w") as f:
+            json.dump(self.to_dict(), f, indent=2)
+        return path
+
+    def write_csv(self, path: str) -> str:
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        cols = ["name", "verdict", "reason", "counterexample", "trials"]
+        with open(path, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
+            w.writeheader()
+            for rec in self.to_records():
+                w.writerow(rec)
+        return path
 
 
 def run_audit(items, oracle: Oracle, title: str) -> AuditReport:
