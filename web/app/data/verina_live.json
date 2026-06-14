@@ -1,0 +1,91 @@
+{
+  "title": "Live Verina spec-faithfulness audit (AXLE)",
+  "oracle": "verina-live",
+  "summary": {
+    "FAITHFUL": 8,
+    "INCONCLUSIVE": 2
+  },
+  "faithful_rate": 0.8,
+  "results": [
+    {
+      "name": "verina_advanced_1",
+      "verdict": "FAITHFUL",
+      "reason": "correct outputs accepted; all wrong outputs rejected (on test witnesses)",
+      "counterexample": "",
+      "trials": 6,
+      "check": "all"
+    },
+    {
+      "name": "verina_advanced_10",
+      "verdict": "INCONCLUSIVE",
+      "reason": "spec not decidable on some witnesses (no Decidable instance / timeout)",
+      "counterexample": "",
+      "trials": 6,
+      "check": "inconclusive"
+    },
+    {
+      "name": "verina_advanced_11",
+      "verdict": "FAITHFUL",
+      "reason": "correct outputs accepted; all wrong outputs rejected (on test witnesses)",
+      "counterexample": "",
+      "trials": 6,
+      "check": "all"
+    },
+    {
+      "name": "verina_advanced_12",
+      "verdict": "FAITHFUL",
+      "reason": "correct outputs accepted; all wrong outputs rejected (on test witnesses)",
+      "counterexample": "",
+      "trials": 6,
+      "check": "all"
+    },
+    {
+      "name": "verina_advanced_13",
+      "verdict": "FAITHFUL",
+      "reason": "correct outputs accepted; all wrong outputs rejected (on test witnesses)",
+      "counterexample": "",
+      "trials": 4,
+      "check": "all"
+    },
+    {
+      "name": "verina_advanced_14",
+      "verdict": "INCONCLUSIVE",
+      "reason": "spec not decidable on some witnesses (no Decidable instance / timeout)",
+      "counterexample": "",
+      "trials": 4,
+      "check": "inconclusive"
+    },
+    {
+      "name": "verina_advanced_15",
+      "verdict": "FAITHFUL",
+      "reason": "correct outputs accepted; all wrong outputs rejected (on test witnesses)",
+      "counterexample": "",
+      "trials": 4,
+      "check": "all"
+    },
+    {
+      "name": "verina_advanced_16",
+      "verdict": "FAITHFUL",
+      "reason": "correct outputs accepted; all wrong outputs rejected (on test witnesses)",
+      "counterexample": "",
+      "trials": 6,
+      "check": "all"
+    },
+    {
+      "name": "verina_advanced_17",
+      "verdict": "FAITHFUL",
+      "reason": "correct outputs accepted; all wrong outputs rejected (on test witnesses)",
+      "counterexample": "",
+      "trials": 6,
+      "check": "all"
+    },
+    {
+      "name": "verina_advanced_18",
+      "verdict": "FAITHFUL",
+      "reason": "correct outputs accepted; all wrong outputs rejected (on test witnesses)",
+      "counterexample": "",
+      "trials": 4,
+      "check": "all"
+    }
+  ]
+}
