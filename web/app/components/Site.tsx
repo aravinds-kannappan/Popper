@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Overview from "./Overview";
 import Benchmark from "./Benchmark";
+import LiveBenchmark from "./LiveBenchmark";
 import Dashboard from "./Dashboard";
 import Research from "./Research";
 import Chat from "./Chat";
@@ -49,7 +50,12 @@ export default function Site() {
         {tab === "benchmark" && (
           <section className="section first">
             <h2>
-              Benchmark <span className="sub">Popper vs the proof checker vs an LLM judge</span>
+              Live agent benchmark <span className="sub">Popper agent vs a plain model, graded by an evaluator agent</span>
+            </h2>
+            <LiveBenchmark />
+
+            <h2 style={{ marginTop: 40 }}>
+              Oracle engine, offline <span className="sub">the Monte-Carlo engine on a labelled set of bugs</span>
             </h2>
             <Benchmark />
           </section>
