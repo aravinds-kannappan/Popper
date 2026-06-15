@@ -2,7 +2,7 @@ const RUNGS: [string, string, string][] = [
   [
     "1 · LLM writes a proof",
     "A fluent, plausible artifact",
-    "No ground truth. Unjustified steps, hidden cases, off-by-one — invisible without an expert reader.",
+    "No ground truth. Unjustified steps, hidden cases, off-by-one, all invisible without an expert reader.",
   ],
   [
     "2 · LLM + Lean / AXLE",
@@ -12,7 +12,7 @@ const RUNGS: [string, string, string][] = [
   [
     "3 · + Popper",
     "Proof matches statement AND an oracle tried & failed to break the statement",
-    "The honest residual: falsify ≠ certify. But dropped hypotheses, vacuity, wrong direction, too-strong/weak specs are exactly what it catches — with a counterexample.",
+    "The honest residual: falsify is not certify. But dropped hypotheses, vacuity, wrong direction, too-strong or too-weak specs are exactly what it catches, with a counterexample.",
   ],
 ];
 

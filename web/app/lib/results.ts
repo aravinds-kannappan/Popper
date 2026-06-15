@@ -1,6 +1,6 @@
 // Precomputed Popper audit results, copied from the repo's `results/` directory.
 // These power the dashboard and the agent's `get_audit_results` tool. They are a
-// reference the agent can consult — not the limit of what it can answer.
+// reference the agent can consult, not the limit of what it can answer.
 
 import math from "../data/math_audit.json";
 import code from "../data/codespec_offline.json";

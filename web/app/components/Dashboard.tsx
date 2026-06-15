@@ -78,7 +78,7 @@ export default function Dashboard({ data }: { data: any }) {
                   <td className="mono">{r.task}</td>
                   <td className="mono" style={{ color: "var(--muted)" }}>{r.verdict_path}</td>
                   <td><Badge verdict={r.final} /></td>
-                  <td>{r.repaired ? "✅" : "—"}</td>
+                  <td>{r.repaired ? "✅" : "-"}</td>
                 </tr>
               ))}
             </tbody>

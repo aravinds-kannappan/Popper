@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Markdown from "./Markdown";
 
 type Role = "user" | "assistant" | "error";
 type ToolCall = { name: string; input: any; output: any };
@@ -62,14 +63,14 @@ export default function Chat() {
       <div className="log" ref={logRef}>
         {msgs.length === 0 && (
           <div className="note">
-            The agent is Claude (Opus 4.8) with live AXLE tools. Ask anything — for checkable
-            claims it runs <code>disprove</code>/<code>check</code> on the Axiom Lean Engine and
+            The agent is Claude (Opus 4.8) with live AXLE tools. Ask anything. For checkable
+            claims it runs <code>disprove</code> or <code>check</code> on the Axiom Lean Engine and
             reports the real result.
           </div>
         )}
         {msgs.map((m, i) => (
           <div key={i} className={`msg ${m.role}`}>
-            {m.content}
+            {m.role === "user" ? m.content : <Markdown>{m.content}</Markdown>}
             {m.toolCalls && m.toolCalls.length > 0 && (
               <div className="toolchip">
                 {m.toolCalls.map((t, j) => (

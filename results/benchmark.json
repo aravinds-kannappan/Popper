@@ -1,0 +1,445 @@
+{
+  "title": "Spec-faithfulness benchmark: Popper vs proof checker vs LLM judge",
+  "n_items": 38,
+  "surfaces": {
+    "math": {
+      "total": 24,
+      "faithful": 11,
+      "unfaithful": 11,
+      "vacuity": 2
+    },
+    "code": {
+      "total": 4,
+      "faithful": 1,
+      "unfaithful": 3,
+      "vacuity": 0
+    },
+    "verina": {
+      "total": 10,
+      "faithful": 10,
+      "unfaithful": 0,
+      "vacuity": 0
+    }
+  },
+  "judges": [
+    "popper",
+    "proof_checker"
+  ],
+  "llm_run": false,
+  "scores": {
+    "popper": {
+      "judge": "popper",
+      "n": 38,
+      "n_unfaithful": 14,
+      "n_faithful": 22,
+      "n_vacuity": 2,
+      "true_positives": 14,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "recall_unfaithful": 1.0,
+      "precision": 1.0,
+      "f1": 1.0,
+      "false_positive_rate": 0.0,
+      "vacuity_handled": 2,
+      "counterexample_yield": 1.0
+    },
+    "proof_checker": {
+      "judge": "proof_checker",
+      "n": 38,
+      "n_unfaithful": 14,
+      "n_faithful": 22,
+      "n_vacuity": 2,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 14,
+      "recall_unfaithful": 0.0,
+      "precision": 0.0,
+      "f1": 0.0,
+      "false_positive_rate": 0.0,
+      "vacuity_handled": 0,
+      "counterexample_yield": 0.0
+    }
+  },
+  "rows": [
+    {
+      "name": "kl_nonneg",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_DROPPED_normalization",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "q=[0.777, 1.534, 1.215] (Σq=3.525≠1) ⇒ Σ pᵢ·log(pᵢ/qᵢ) = -1.1543 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "data_processing",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "data_processing_DROPPED_markov",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Z) = 0.8318 > I(X;Y) = 0.0478  (Z leaks X directly)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_WRONG_direction",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(λp+(1-λ)q) = 1.0797 > λH(p)+(1-λ)H(q) = 1.0600  (entropy is concave, not convex)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_uniform_vacuous_guard",
+      "surface": "math",
+      "family": "vacuity",
+      "gold": "INCONCLUSIVE",
+      "popper_verdict": "INCONCLUSIVE",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.0843 < |a|^2|b|^2=0.2061",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=2.0233 > GM=1.9374",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_ineq",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_ineq_FLIPPED",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "x=0.113, y=-0.951: |x+y|=0.838 < |x|+|y|=1.063",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_FLIPPED",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X,Y)=2.1239 < H(X)+H(Y)=2.1619",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonneg",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonpos_WRONG",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Y)=0.0381 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_entropy",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_entropy_FLIPPED",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=1.1647 > H(p)=1.0590",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_concave",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_concave_FLIPPED",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=1.2155 > mean(log)=1.1721",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_mean_nonneg_WRONG",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-1.0829 < 0 for x=[-2.41, 0.11, -0.95]",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "self_successor_vacuous",
+      "surface": "math",
+      "family": "vacuity",
+      "gold": "INCONCLUSIVE",
+      "popper_verdict": "INCONCLUSIVE",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "sort_by_length",
+      "surface": "code",
+      "family": "vacuous",
+      "gold": "VACUOUS",
+      "popper_verdict": "VACUOUS",
+      "popper_counterexample": "impl 'all_zeros' passes; spec fails to pin down the answer",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "max_lower_bound_only",
+      "surface": "code",
+      "family": "incomplete",
+      "gold": "INCOMPLETE",
+      "popper_verdict": "INCOMPLETE",
+      "popper_counterexample": "impl 'max_plus_one' passes the spec; differs from reference at input (3, 5)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "abs_value",
+      "surface": "code",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "abs_strictly_positive",
+      "surface": "code",
+      "family": "unsound",
+      "gold": "UNSOUND",
+      "popper_verdict": "UNSOUND",
+      "popper_counterexample": "reference fails spec at input (0,) (→ output 0)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "verina_advanced_1",
+      "surface": "verina",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "verina_advanced_10",
+      "surface": "verina",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "INCONCLUSIVE",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "verina_advanced_11",
+      "surface": "verina",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "verina_advanced_12",
+      "surface": "verina",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "verina_advanced_13",
+      "surface": "verina",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "verina_advanced_14",
+      "surface": "verina",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "INCONCLUSIVE",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "verina_advanced_15",
+      "surface": "verina",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "verina_advanced_16",
+      "surface": "verina",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "verina_advanced_17",
+      "surface": "verina",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "verina_advanced_18",
+      "surface": "verina",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    }
+  ]
+}

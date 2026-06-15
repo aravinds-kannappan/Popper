@@ -27,7 +27,30 @@ a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 code { font-family: var(--mono); }
 
-.wrap { max-width: 1040px; margin: 0 auto; padding: 32px 20px 80px; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 8px 20px 80px; }
+
+/* top navigation */
+.nav { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+.nav-inner { max-width: 1040px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 18px; }
+.brand { font-weight: 800; font-size: 18px; letter-spacing: -0.01em; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.brand .logo { color: var(--accent); }
+.nav-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-left: 8px; }
+.nav-tab { background: transparent; border: none; color: var(--muted); font-size: 14px; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+.nav-tab:hover { color: var(--text); background: var(--panel-2); }
+.nav-tab.active { color: var(--text); background: var(--panel-2); box-shadow: inset 0 -2px 0 var(--accent); }
+.nav-gh { margin-left: auto; font-size: 14px; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; color: var(--text); }
+.nav-gh:hover { border-color: var(--accent); text-decoration: none; }
+
+.section.first { margin-top: 28px; }
+.cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.btn { background: var(--accent); color: #0b0e14; border: none; border-radius: 8px; padding: 9px 16px; font-weight: 700; font-size: 14px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn.ghost:hover { border-color: var(--accent); text-decoration: none; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.panel.pad, .pad { padding: 16px 18px; }
+.h3 { font-size: 15px; margin: 4px 0 8px; letter-spacing: -0.01em; }
+.card.link { cursor: pointer; }
+.card.link:hover { border-color: var(--accent); }
 
 .hero { padding: 28px 0 8px; }
 .hero h1 { font-size: 40px; margin: 0 0 6px; letter-spacing: -0.02em; }
@@ -80,3 +103,23 @@ td.mono, .mono { font-family: var(--mono); }
 .examples button:hover { border-color: var(--accent); color: var(--accent); }
 .note { color: var(--muted); font-size: 13px; }
 .foot { margin-top: 48px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+/* rendered markdown (agent replies + research) */
+.md { line-height: 1.6; }
+.md > :first-child { margin-top: 0; }
+.md h1 { font-size: 26px; margin: 18px 0 6px; letter-spacing: -0.02em; }
+.md h2 { font-size: 19px; margin: 26px 0 8px; letter-spacing: -0.01em; }
+.md h3 { font-size: 15px; margin: 18px 0 6px; }
+.md p { margin: 10px 0; }
+.md ul, .md ol { margin: 10px 0; padding-left: 22px; }
+.md li { margin: 4px 0; }
+.md a { color: var(--accent); }
+.md code { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; font-size: 0.9em; }
+.md pre { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; }
+.md pre code { background: none; border: none; padding: 0; }
+.md blockquote { border-left: 3px solid var(--border); margin: 12px 0; padding: 2px 14px; color: var(--muted); }
+.md table { margin: 14px 0; }
+.md hr { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+.md .katex-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
+.msg .md { font-size: 14.5px; }
+.msg.assistant { white-space: normal; }
