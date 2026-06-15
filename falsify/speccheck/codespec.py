@@ -1,14 +1,14 @@
 """The code-specification falsification oracle.
 
 Given a Verina-style :class:`~falsify.speccheck.task.Task` and any AXLE backend, decide
-whether the task's specification is *faithful* — i.e. neither too strong nor too
-weak — using three independent, executable checks:
+whether the task's specification is *faithful* - i.e. neither too strong nor too
+weak - using three independent, executable checks:
 
-  1. SOUNDNESS   — the *reference* implementation must satisfy the spec.
+  1. SOUNDNESS   - the *reference* implementation must satisfy the spec.
                    If it doesn't, the spec is too strong  → UNSOUND.
-  2. COMPLETENESS — no *wrong* implementation may satisfy the spec.
+  2. COMPLETENESS - no *wrong* implementation may satisfy the spec.
                     If a known-bad mutant slips through → INCOMPLETE.
-  3. VACUITY     — if even an "anything goes" implementation satisfies the spec,
+  3. VACUITY     - if even an "anything goes" implementation satisfies the spec,
                    the spec constrains nothing            → VACUOUS.
 
 This is exactly the gap the Lean compiler is blind to: every one of these
@@ -41,7 +41,7 @@ class CodeSpecOracle(Oracle):
             return OracleResult(
                 name=task.name,
                 verdict=Verdict.UNSOUND,
-                reason="spec is too strong — it rejects the correct reference implementation",
+                reason="spec is too tight; it rejects the correct reference implementation",
                 counterexample=_ce(ref.counterexample),
                 trials=trials,
                 details={"check": "soundness"},
@@ -56,7 +56,7 @@ class CodeSpecOracle(Oracle):
                 return OracleResult(
                     name=task.name,
                     verdict=Verdict.VACUOUS,
-                    reason=(f"spec constrains nothing — even the throwaway impl "
+                    reason=(f"spec constrains nothing; even the throwaway impl "
                             f"'{task.arbitrary}' satisfies it"),
                     counterexample=f"impl '{task.arbitrary}' passes; spec fails to pin down the answer",
                     trials=trials,
@@ -72,7 +72,7 @@ class CodeSpecOracle(Oracle):
                 return OracleResult(
                     name=task.name,
                     verdict=Verdict.INCOMPLETE,
-                    reason=(f"spec is too weak — the wrong impl '{mutant}' satisfies it "
+                    reason=(f"spec is too loose; the wrong impl '{mutant}' satisfies it "
                             f"yet disagrees with the reference"),
                     counterexample=(f"impl '{mutant}' passes the spec; "
                                     f"differs from reference at input {witness}"),

@@ -102,6 +102,67 @@ function HBars({ title, sub, rows }: { title: string; sub?: string; rows: { labe
   );
 }
 
+// A line chart with a log x-axis, for the budget sweep.
+function LineChart({ title, sub, points }: { title: string; sub?: string; points: { x: number; recall: number; rare: number }[] }) {
+  const W = 460;
+  const H = 230;
+  const padL = 38;
+  const padB = 46;
+  const padT = 12;
+  const innerW = W - padL - 14;
+  const innerH = H - padB - padT;
+  const xs = points.map((p) => Math.log10(p.x));
+  const xmin = Math.min(...xs);
+  const xmax = Math.max(...xs);
+  const px = (x: number) => padL + ((Math.log10(x) - xmin) / (xmax - xmin)) * innerW;
+  const py = (v: number) => padT + innerH * (1 - v / 100);
+
+  const line = (key: "recall" | "rare") =>
+    points.map((p, i) => `${i === 0 ? "M" : "L"} ${px(p.x).toFixed(1)} ${py(p[key]).toFixed(1)}`).join(" ");
+
+  return (
+    <div className="chart wide">
+      <div className="chart-title">{title}</div>
+      {sub && <div className="chart-sub">{sub}</div>}
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={title}>
+        {[0, 25, 50, 75, 100].map((t) => {
+          const y = py(t);
+          return (
+            <g key={t}>
+              <line x1={padL} y1={y} x2={W - 14} y2={y} stroke="#232a39" strokeWidth={1} />
+              <text x={padL - 6} y={y + 3} textAnchor="end" fontSize="9" fill={MUTED}>
+                {t}
+              </text>
+            </g>
+          );
+        })}
+        {points.map((p, i) => (
+          <text key={i} x={px(p.x)} y={H - padB + 16} textAnchor="middle" fontSize="9" fill={MUTED}>
+            {p.x >= 1000 ? `${p.x / 1000}k` : p.x}
+          </text>
+        ))}
+        <text x={padL + innerW / 2} y={H - 6} textAnchor="middle" fontSize="10" fill={MUTED}>
+          random draws per statement (log scale)
+        </text>
+        <path d={line("recall")} fill="none" stroke={BLUE} strokeWidth={2} />
+        <path d={line("rare")} fill="none" stroke={GREEN} strokeWidth={2} />
+        {points.map((p, i) => (
+          <g key={i}>
+            <circle cx={px(p.x)} cy={py(p.recall)} r={3} fill={BLUE} />
+            <circle cx={px(p.x)} cy={py(p.rare)} r={3} fill={GREEN} />
+          </g>
+        ))}
+        <g>
+          <rect x={padL + 8} y={padT + 4} width={10} height={3} fill={GREEN} />
+          <text x={padL + 22} y={padT + 9} fontSize="9" fill="#e6e9ef">subtle bugs only</text>
+          <rect x={padL + 130} y={padT + 4} width={10} height={3} fill={BLUE} />
+          <text x={padL + 144} y={padT + 9} fontSize="9" fill="#e6e9ef">all math bugs</text>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 export default function Charts() {
   const data: any = bench;
   const s = data.scores;
@@ -126,6 +187,12 @@ export default function Charts() {
     caught: f.popper || 0,
   }));
 
+  const sweep = (data.sweep || []).map((r: any) => ({
+    x: r.budget,
+    recall: Math.round(r.recall * 100),
+    rare: Math.round(r.rare_recall * 100),
+  }));
+
   return (
     <div>
       <div className="chart-grid">
@@ -140,11 +207,20 @@ export default function Charts() {
           bars={yieldBars}
         />
       </div>
-      <HBars
-        title="Bugs caught by kind, Popper"
-        sub="green is caught, grey track is the total in the corpus. The proof checker caught zero in every row."
-        rows={famRows}
-      />
+      <div className="chart-grid">
+        <HBars
+          title="Bugs caught by kind, Popper"
+          sub="green is caught, grey track is the total. The proof checker caught zero in every row."
+          rows={famRows}
+        />
+        {sweep.length > 0 && (
+          <LineChart
+            title="Detection improves with the search budget"
+            sub="this is why the score is not a flat 100%: subtle bugs that fire on a tiny fraction of inputs need more draws to find"
+            points={sweep}
+          />
+        )}
+      </div>
     </div>
   );
 }

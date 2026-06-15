@@ -92,31 +92,49 @@ statement holds up or it runs out of budget.
 
 ## The benchmark
 
-I wanted a number, not just an argument. So I built a benchmark: a set of 334
+I wanted a number, not just an argument. So I built a benchmark: a set of 346
 statements where I know the right answer ahead of time (faithful or unfaithful,
 and if unfaithful, what kind of bug it is). Then I run three checkers over the
 same set and see how many of the unfaithful ones each catches.
 
-- **math, 320 items.** Many families of inequalities (Cauchy-Schwarz, AM-GM, the
+- **math, 332 items.** Many families of inequalities (Cauchy-Schwarz, AM-GM, the
   triangle inequality, several from information theory, and more), each generated
   across a range of sizes, with faithful versions and broken versions side by
-  side. Checked by the local Monte-Carlo engine, so this part needs no API key.
+  side, plus a batch of "subtle" bugs that only fail on a tiny fraction of inputs.
+  These are run for real by the local Monte-Carlo engine every time, so this part
+  needs no API key.
 - **code, 4 items.** The offline code-spec fixtures.
-- **verina, 10 items.** Real Verina tasks checked live against AXLE. These are
-  meant to be faithful, so they measure how often a checker raises a false alarm.
+- **verina, 10 items.** Real Verina tasks, with verdicts replayed from an earlier
+  live AXLE run. They are meant to be faithful, so they measure how often a checker
+  raises a false alarm.
 
 | checker | unfaithful caught | false alarms | gives a counterexample | F1 |
 |---|---|---|---|---|
-| Popper | 168/168 (100%) | 0/163 (0%) | yes, every time | 1.00 |
-| Proof checker (AXLE/Lean) | 0/168 (0%) | 0/163 (0%) | no | 0.00 |
+| Popper | 176/178 (99%) | 0/165 (0%) | yes, every time | 0.99 |
+| Proof checker (AXLE/Lean) | 0/178 (0%) | 0/165 (0%) | no | 0.00 |
 | LLM judge (a model reads the spec and guesses) | runnable live | runnable live | no | runnable live |
 
-The proof checker catches none of them, and that is not a knock on the prover. It
-is the point: catching a bad spec is simply not a thing a proof checker does,
-because every spec in the set is valid as far as the proof is concerned. The LLM
-judge can sometimes guess right, but it never hands you the input that breaks the
-spec. For a published number, the Verina paper puts the best general model around
-52% on combined spec soundness and completeness. Run it yourself:
+**Why 99% and not 100%, and why the F1 is a real number.** The two specs Popper
+misses at this setting are the rarest subtle bugs: they fail on roughly 1 input in
+10,000, and at a budget of 2,000 random draws Popper sometimes does not hit the bad
+input. That is honest, and it is exactly the limitation I document. Spend more
+draws and it finds them. The benchmark records this as a sweep:
+
+| draws per statement | math recall | math F1 | subtle bugs caught | subtle-bug F1 |
+|---|---|---|---|---|
+| 100 | 98% | 0.99 | 6/10 (60%) | 0.75 |
+| 500 | 99% | 0.99 | 8/10 (80%) | 0.89 |
+| 2,000 | 99% | 0.99 | 8/10 (80%) | 0.89 |
+| 10,000 | 100% | 1.00 | 10/10 (100%) | 1.00 |
+| 50,000 | 100% | 1.00 | 10/10 (100%) | 1.00 |
+
+The proof checker catches none of them at any budget, and that is not a knock on
+the prover. It is the point: catching a bad spec is simply not a thing a proof
+checker does, because every spec in the set is valid as far as the proof is
+concerned. The LLM judge can sometimes guess right, but it never hands you the
+input that breaks the spec. For a published number, the Verina paper puts the best
+general model around 52% on combined spec soundness and completeness. Run it
+yourself:
 
 ```bash
 python examples/run_benchmark.py          # Popper and the proof-checker baseline, offline
@@ -193,6 +211,23 @@ pip install axiom-axle                                  # the official AXLE clie
 export AXLE_API_KEY=...                                 # https://axle.axiommath.ai/app/console
 python examples/verina_live_audit.py --limit 8
 ```
+
+## The website and its API keys
+
+The site in [`web/`](./web) has an Overview, the Benchmark with charts, the audit
+results, the Research write-up, and a live Claude agent. To be clear about keys:
+the local math benchmark needs none, but the deployed site does need two, set as
+environment variables (on Vercel, in the project settings):
+
+- `ANTHROPIC_API_KEY` powers the Claude agent (`web/app/api/chat/route.ts`).
+- `AXLE_API_KEY` powers the agent's live disprove and check tools against the
+  Axiom Lean Engine (`web/app/lib/axle.ts`).
+
+Both are read server-side only and are never sent to the browser. The full list,
+including the optional `ANTHROPIC_MODEL`, `AXLE_ENVIRONMENT`, and `AXLE_BASE_URL`,
+is in [`web/.env.example`](./web/.env.example). I did not change any of this
+wiring, so if those keys are already set on Vercel the agent and live AXLE keep
+working.
 
 ## A note on honesty
 

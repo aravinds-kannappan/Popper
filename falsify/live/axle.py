@@ -2,7 +2,7 @@
 
 A thin sync wrapper over the official async ``axle.AxleClient``
 (``pip install axiom-axle``). The official package is imported lazily inside
-``__init__`` so that importing :mod:`falsify` never requires it — only the live
+``__init__`` so that importing :mod:`falsify` never requires it - only the live
 path does. The concurrent Verina audit in :mod:`falsify.live.verina` drives the
 async client directly; this wrapper is the convenient general-purpose handle.
 """

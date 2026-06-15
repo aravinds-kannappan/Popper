@@ -1,18 +1,18 @@
 # Live Verina spec-faithfulness audit (AXLE)
 
-_oracle: `verina-live` — 10 claims | ✓ FAITHFUL 8  ? INCONCLUSIVE 2_
+_oracle: `verina-live`, 10 claims | ✓ FAITHFUL 8  ? INCONCLUSIVE 2_
 
 | | verdict | claim | reason / counterexample |
 |---|---|---|---|
-| ✓ | `FAITHFUL` | `verina_basic_1` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
-| ✓ | `FAITHFUL` | `verina_basic_2` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
-| ? | `INCONCLUSIVE` | `verina_basic_3` | spec not decidable on some witnesses (no Decidable instance / timeout) |
-| ✓ | `FAITHFUL` | `verina_basic_4` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
-| ✓ | `FAITHFUL` | `verina_basic_5` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
-| ✓ | `FAITHFUL` | `verina_basic_6` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
-| ✓ | `FAITHFUL` | `verina_basic_7` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
-| ✓ | `FAITHFUL` | `verina_basic_8` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
-| ? | `INCONCLUSIVE` | `verina_basic_9` | spec not decidable on some witnesses (no Decidable instance / timeout) |
-| ✓ | `FAITHFUL` | `verina_basic_10` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
+| ✓ | `FAITHFUL` | `verina_advanced_1` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
+| ? | `INCONCLUSIVE` | `verina_advanced_10` | spec not decidable on some witnesses (no Decidable instance / timeout) |
+| ✓ | `FAITHFUL` | `verina_advanced_11` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
+| ✓ | `FAITHFUL` | `verina_advanced_12` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
+| ✓ | `FAITHFUL` | `verina_advanced_13` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
+| ? | `INCONCLUSIVE` | `verina_advanced_14` | spec not decidable on some witnesses (no Decidable instance / timeout) |
+| ✓ | `FAITHFUL` | `verina_advanced_15` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
+| ✓ | `FAITHFUL` | `verina_advanced_16` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
+| ✓ | `FAITHFUL` | `verina_advanced_17` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
+| ✓ | `FAITHFUL` | `verina_advanced_18` | correct outputs accepted; all wrong outputs rejected (on test witnesses) |
 
-> Popper *falsifies*; it does not certify. A FAITHFUL verdict means no counterexample was found within the search budget — the dominant real-world failures (dropped hypotheses, vacuity, wrong direction, too-strong/too-weak specs) are exactly what it catches.
+> Popper breaks statements; it does not certify them. A FAITHFUL verdict means no counterexample was found within the search budget. The common real-world failures (dropped hypotheses, vacuity, wrong direction, too-loose or too-tight specs) are exactly what it catches.

@@ -10,8 +10,8 @@ us a rigorous, concrete faithfulness oracle with no mutant generation required:
 We test each witness by asking AXLE to ``check`` a one-line obligation
 ``<Name>_postcond <args> <value> (by native_decide) := by native_decide`` and
 reading whether it proved, was evaluated false, or could not be decided. (We use
-``native_decide`` purely to *evaluate* concrete decidable propositions — not to
-discharge a real proof obligation — which is exactly how you stress a spec.)
+``native_decide`` purely to *evaluate* concrete decidable propositions - not to
+discharge a real proof obligation - which is exactly how you stress a spec.)
 
 The dataset (CC-BY-SA-4.0) is fetched on demand into a git-ignored cache via
 ``curl`` and is never vendored into this repo.

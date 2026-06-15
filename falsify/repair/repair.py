@@ -1,15 +1,15 @@
-"""M2 — counterexample-guided specification repair.
+"""M2 - counterexample-guided specification repair.
 
 When the oracle falsifies a spec it returns a counterexample. A *repairer*
 consumes that signal and proposes a stronger/weaker spec; the loop re-audits
 until the verdict is FAITHFUL or the budget runs out. This is the whole point of
 falsification over plain checking: the failure is *actionable*.
 
-Repairers (offline, on the executable `Task` model — runnable + tested now):
-  * :class:`TemplateRepairer`     — declarative repairs (what a good fix looks like).
-  * :class:`FunctionalSpecRepairer` — generic fallback: pin the output to the
+Repairers (offline, on the executable `Task` model - runnable + tested now):
+  * :class:`TemplateRepairer`     - declarative repairs (what a good fix looks like).
+  * :class:`FunctionalSpecRepairer` - generic fallback: pin the output to the
     reference (the strongest sound+complete spec; always converges).
-  * :class:`ChainRepairer`        — try repairers in order.
+  * :class:`ChainRepairer`        - try repairers in order.
 
 :class:`LLMRepairer` is the path that scales to *real* Verina: given a task and a
 counterexample it asks a model for a repaired Lean postcondition. It is gated on
@@ -78,7 +78,7 @@ class FunctionalSpecRepairer(Repairer):
 
 
 class TemplateRepairer(Repairer):
-    """Declarative repairs for known shapes — illustrative of a *good* fix."""
+    """Declarative repairs for known shapes - illustrative of a *good* fix."""
 
     def __init__(self):
         def _sorted(args, out):

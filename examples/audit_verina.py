@@ -25,7 +25,7 @@ def main() -> int:
     oracle = CodeSpecOracle(MockAxleClient())
     report = run_audit(
         verina_like_tasks(), oracle,
-        title="Code-spec oracle — Verina-style fixtures [offline model]",
+        title="Code-spec oracle - Verina-style fixtures [offline model]",
     )
     print(report.render_markdown() if args.markdown else report.render_terminal())
     return 0

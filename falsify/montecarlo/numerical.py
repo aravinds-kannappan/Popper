@@ -4,7 +4,7 @@ Every theorem in analysis / probability / information theory has a *numerical
 shadow*: an inequality can be Monte-Carlo checked on sampled distributions, an
 identity can be checked by simulating the relevant process. If the formalized
 statement dropped a hypothesis (normalization, a Markov-chain assumption,
-integrability) or flipped a direction, the shadow breaks on some sample — and
+integrability) or flipped a direction, the shadow breaks on some sample - and
 we get a counterexample *for free*, before spending any proof compute.
 
 A `Statement` carries:
@@ -14,7 +14,7 @@ A `Statement` carries:
 and the *formalized predicate* the oracle actually tests is ``H → C`` (i.e.
 ``(not H) or C``). To model an **unfaithful** formalization that dropped a
 hypothesis, you simply build the statement with ``hypothesis=None`` and a
-sampler that ranges over the unrestricted space — then C fails on some draw and
+sampler that ranges over the unrestricted space - then C fails on some draw and
 the oracle falsifies it. To model a **vacuous** statement, give it a hypothesis
 that is (almost) never satisfiable; the oracle reports INCONCLUSIVE because the
 conclusion was never actually exercised.
@@ -135,7 +135,7 @@ class NumericalOracle(Oracle):
                 name=stmt.name,
                 verdict=Verdict.INCONCLUSIVE,
                 reason=(
-                    f"hypothesis satisfied in {hyp_hits}/{self.n_trials} draws — "
+                    f"hypothesis satisfied in {hyp_hits}/{self.n_trials} draws; "
                     "conclusion never exercised (possibly vacuous)"
                 ),
                 trials=self.n_trials,

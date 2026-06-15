@@ -1,5 +1,5 @@
 name,verdict,reason,counterexample,trials
-sort_by_length,VACUOUS,spec constrains nothing — even the throwaway impl 'all_zeros' satisfies it,impl 'all_zeros' passes; spec fails to pin down the answer,2
-max_lower_bound_only,INCOMPLETE,spec is too weak — the wrong impl 'max_plus_one' satisfies it yet disagrees with the reference,"impl 'max_plus_one' passes the spec; differs from reference at input (3, 5)",3
+sort_by_length,VACUOUS,spec constrains nothing; even the throwaway impl 'all_zeros' satisfies it,impl 'all_zeros' passes; spec fails to pin down the answer,2
+max_lower_bound_only,INCOMPLETE,spec is too loose; the wrong impl 'max_plus_one' satisfies it yet disagrees with the reference,"impl 'max_plus_one' passes the spec; differs from reference at input (3, 5)",3
 abs_value,FAITHFUL,reference passes; no wrong implementation slips through; not vacuous,,4
-abs_strictly_positive,UNSOUND,spec is too strong — it rejects the correct reference implementation,"reference fails spec at input (0,) (→ output 0)",1
+abs_strictly_positive,UNSOUND,spec is too tight; it rejects the correct reference implementation,"reference fails spec at input (0,) (→ output 0)",1

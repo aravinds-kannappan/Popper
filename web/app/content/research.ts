@@ -19,11 +19,12 @@ wrong.
 I built Popper to attack that weak spot. Popper is an "oracle", which here just
 means a separate checker you can ask one question: can I break this statement? It
 tries hard to find an input that makes the statement fail, and when it finds one
-it gives you that input, which I call a counterexample. On a benchmark of 334
-statements I labelled by hand, Popper flags every one of the 168 broken ones with
-a counterexample and raises no false alarms on the 163 good ones. A proof checker
-on its own flags none, because flagging a bad statement is not something a proof
-checker can do.
+it gives you that input, which I call a counterexample. On a benchmark of 346
+statements I labelled by hand, Popper flags 176 of the 178 broken ones with a
+counterexample and raises no false alarms on the 165 good ones. The two it misses
+are subtle bugs that only fail on about one input in ten thousand, and with more
+search it finds those too. A proof checker on its own flags none, because flagging
+a bad statement is not something a proof checker can do.
 
 ## Why the proof checker misses this
 
@@ -80,20 +81,24 @@ the statement and check again until it holds up.
 
 ## The benchmark
 
-I labelled 334 statements as faithful or unfaithful, recorded the kind of bug for
+I labelled 346 statements as faithful or unfaithful, recorded the kind of bug for
 the broken ones, and ran three checkers over the same set: the proof checker
 (accepts anything valid as a proof), an LLM judge (a model reads the statement and
 guesses, with no execution), and Popper.
 
 | checker | unfaithful caught | false alarms | counterexample | F1 |
 |---|---|---|---|---|
-| Popper | 168/168 (100%) | 0/163 (0%) | every time | 1.00 |
-| Proof checker | 0/168 (0%) | 0/163 (0%) | never | 0.00 |
+| Popper | 176/178 (99%) | 0/165 (0%) | every time | 0.99 |
+| Proof checker | 0/178 (0%) | 0/165 (0%) | never | 0.00 |
 | LLM judge | runnable live | runnable live | never | runnable live |
 
-The proof checker scores zero no matter how strong the prover behind it is. The
-LLM judge can guess, but it never returns the input that breaks the spec. The full
-numbers, the charts, and the per-item table are on the Benchmark tab.
+The score is 0.99, not a flat 1.00, on purpose. Easy bugs fail on about half of
+all random inputs, so Popper catches them in a couple of draws. The subtle bugs
+fail on a tiny fraction of inputs, so finding them depends on how many draws you
+spend: at 100 draws Popper catches 6 of 10 subtle bugs, and by 10,000 draws it
+catches all 10. F1 is a real number that moves with effort, shown on the budget
+chart on the Benchmark tab. The proof checker scores zero at every budget. The LLM
+judge can guess, but it never returns the input that breaks the spec.
 
 ## What Popper adds
 

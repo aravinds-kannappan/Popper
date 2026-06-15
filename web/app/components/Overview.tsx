@@ -75,12 +75,12 @@ export default function Overview({ go }: { go: (tab: string) => void }) {
         </h2>
         <div className="cards">
           <div className="card link" onClick={() => go("benchmark")}>
-            <div className="k">168/168</div>
-            <div className="l">broken specs caught by Popper. The proof checker catches none.</div>
+            <div className="k">0 vs 178</div>
+            <div className="l">broken specs the proof checker catches, against the 178 Popper finds given enough search.</div>
           </div>
           <div className="card link" onClick={() => go("benchmark")}>
             <div className="k">every one</div>
-            <div className="l">came with a concrete input that breaks the spec.</div>
+            <div className="l">of Popper's detections comes with a concrete input that breaks the spec.</div>
           </div>
           <div className="card link" onClick={() => go("research")}>
             <div className="k">~52%</div>

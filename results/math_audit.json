@@ -1,5 +1,5 @@
 {
-  "title": "Numerical oracle \u2014 information-theory ladder",
+  "title": "Numerical oracle - information-theory ladder",
   "oracle": "numerical",
   "summary": {
     "FAITHFUL": 3,
@@ -59,7 +59,7 @@
     {
       "name": "entropy_uniform_vacuous_guard",
       "verdict": "INCONCLUSIVE",
-      "reason": "hypothesis satisfied in 0/2000 draws \u2014 conclusion never exercised (possibly vacuous)",
+      "reason": "hypothesis satisfied in 0/2000 draws; conclusion never exercised (possibly vacuous)",
       "counterexample": "",
       "trials": 2000,
       "hypothesis_hits": 0

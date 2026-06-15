@@ -2,7 +2,7 @@
 
 A Popper oracle takes a *formalized claim* (a math statement, or a code
 specification) and tries to **falsify** it cheaply with an executable signal.
-It never *certifies* faithfulness — it only reports whether it managed to break
+It never *certifies* faithfulness - it only reports whether it managed to break
 the claim, and if so, hands back a concrete counterexample that doubles as a
 repair signal and an RL reward.
 

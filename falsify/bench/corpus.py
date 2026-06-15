@@ -439,6 +439,43 @@ def fam_vacuity(k):
     ]
 
 
+# Subtle bugs: a spec that is wrong only on a small fraction p of inputs. The
+# label is known (it is unfaithful), but whether Monte-Carlo finds the
+# counterexample depends on how many draws it spends, since the probability of
+# hitting the bad region in N draws is 1 - (1 - p)^N. These are what make the
+# benchmark a real test of effort rather than a clean 100%: at a small budget
+# Popper misses the rarest ones, and recall climbs toward 1 as the budget grows.
+RARE_PS = (0.2, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001)
+
+
+def rare_edge_statements() -> list[Statement]:
+    out: list[Statement] = []
+    for p in RARE_PS:
+        out.append(Statement(
+            name=f"rare_edge_p{p}",
+            description=f"Subtle bug: a postcondition that fails on about a {p:g} fraction of inputs.",
+            lean=f"theorem post (x) : score x > {p}",
+            sample=lambda rng: {"u": rng.random()},
+            claim=lambda i, p=p: i["u"] > p,
+            summarize=lambda i, p=p: f"input scored {i['u']:.5f} <= {p:g} (the spec rejects it)",
+            expected=Verdict.FALSIFIED,
+            tags=("rare-edge",),
+        ))
+    # genuinely faithful twins (true on every input), so the subtle family also
+    # contributes to the false-positive measurement.
+    for j in range(2):
+        out.append(Statement(
+            name=f"rare_edge_faithful_{j}",
+            description="A postcondition that holds on every input.",
+            lean="theorem post (x) : score x >= 0",
+            sample=lambda rng: {"u": rng.random()},
+            claim=lambda i: i["u"] >= 0.0,
+            expected=Verdict.FAITHFUL,
+            tags=("faithful",),
+        ))
+    return out
+
+
 _CHEAP = [fam_kl, fam_concave, fam_cauchy, fam_amgm, fam_triangle, fam_qmam,
           fam_jensen, fam_variance, fam_cross_entropy, fam_entropy_upper]
 _MED = [fam_subadditive, fam_mi_sign, fam_cond_entropy]
@@ -458,6 +495,7 @@ def generate_math_statements() -> list[Statement]:
             out += fam(k)
     for k in (2, 5, 9):           # a few vacuity traps
         out += fam_vacuity(k)
+    out += rare_edge_statements()
     return out
 
 

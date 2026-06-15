@@ -1,11 +1,11 @@
 {
   "title": "Spec-faithfulness benchmark: Popper vs proof checker vs LLM judge",
-  "n_items": 334,
+  "n_items": 346,
   "surfaces": {
     "math": {
-      "total": 320,
-      "faithful": 152,
-      "unfaithful": 165,
+      "total": 332,
+      "faithful": 154,
+      "unfaithful": 175,
       "vacuity": 3
     },
     "code": {
@@ -29,29 +29,29 @@
   "scores": {
     "popper": {
       "judge": "popper",
-      "n": 334,
-      "n_unfaithful": 168,
-      "n_faithful": 163,
+      "n": 346,
+      "n_unfaithful": 178,
+      "n_faithful": 165,
       "n_vacuity": 3,
-      "true_positives": 168,
+      "true_positives": 176,
       "false_positives": 0,
-      "false_negatives": 0,
-      "recall_unfaithful": 1.0,
+      "false_negatives": 2,
+      "recall_unfaithful": 0.9888,
       "precision": 1.0,
-      "f1": 1.0,
+      "f1": 0.9944,
       "false_positive_rate": 0.0,
       "vacuity_handled": 3,
       "counterexample_yield": 1.0
     },
     "proof_checker": {
       "judge": "proof_checker",
-      "n": 334,
-      "n_unfaithful": 168,
-      "n_faithful": 163,
+      "n": 346,
+      "n_unfaithful": 178,
+      "n_faithful": 165,
       "n_vacuity": 3,
       "true_positives": 0,
       "false_positives": 0,
-      "false_negatives": 168,
+      "false_negatives": 178,
       "recall_unfaithful": 0.0,
       "precision": 0.0,
       "f1": 0.0,
@@ -80,6 +80,12 @@
       "proof_checker": 0
     },
     {
+      "family": "rare-edge",
+      "total": 10,
+      "popper": 8,
+      "proof_checker": 0
+    },
+    {
       "family": "vacuous",
       "total": 1,
       "popper": 1,
@@ -101,8 +107,8 @@
   "by_surface": [
     {
       "surface": "math",
-      "unfaithful": 165,
-      "popper": 165,
+      "unfaithful": 175,
+      "popper": 173,
       "proof_checker": 0
     },
     {
@@ -114,6 +120,54 @@
     {
       "surface": "verina",
       "unfaithful": 0
+    }
+  ],
+  "headline_budget": 2000,
+  "sweep": [
+    {
+      "budget": 100,
+      "recall": 0.9771,
+      "f1": 0.9884,
+      "rare_caught": 6,
+      "rare_total": 10,
+      "rare_recall": 0.6,
+      "rare_f1": 0.75
+    },
+    {
+      "budget": 500,
+      "recall": 0.9886,
+      "f1": 0.9943,
+      "rare_caught": 8,
+      "rare_total": 10,
+      "rare_recall": 0.8,
+      "rare_f1": 0.8889
+    },
+    {
+      "budget": 2000,
+      "recall": 0.9886,
+      "f1": 0.9943,
+      "rare_caught": 8,
+      "rare_total": 10,
+      "rare_recall": 0.8,
+      "rare_f1": 0.8889
+    },
+    {
+      "budget": 10000,
+      "recall": 1.0,
+      "f1": 1.0,
+      "rare_caught": 10,
+      "rare_total": 10,
+      "rare_recall": 1.0,
+      "rare_f1": 1.0
+    },
+    {
+      "budget": 50000,
+      "recall": 1.0,
+      "f1": 1.0,
+      "rare_caught": 10,
+      "rare_total": 10,
+      "rare_recall": 1.0,
+      "rare_f1": 1.0
     }
   ],
   "rows": [
@@ -3313,6 +3367,126 @@
       "family": "vacuity",
       "gold": "INCONCLUSIVE",
       "popper_verdict": "INCONCLUSIVE",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_p0.2",
+      "surface": "math",
+      "family": "rare-edge",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "input scored 0.10070 <= 0.2 (the spec rejects it)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_p0.05",
+      "surface": "math",
+      "family": "rare-edge",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "input scored 0.01404 <= 0.05 (the spec rejects it)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_p0.02",
+      "surface": "math",
+      "family": "rare-edge",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "input scored 0.01404 <= 0.02 (the spec rejects it)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_p0.01",
+      "surface": "math",
+      "family": "rare-edge",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "input scored 0.00114 <= 0.01 (the spec rejects it)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_p0.005",
+      "surface": "math",
+      "family": "rare-edge",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "input scored 0.00114 <= 0.005 (the spec rejects it)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_p0.002",
+      "surface": "math",
+      "family": "rare-edge",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "input scored 0.00114 <= 0.002 (the spec rejects it)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_p0.001",
+      "surface": "math",
+      "family": "rare-edge",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "input scored 0.00024 <= 0.001 (the spec rejects it)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_p0.0005",
+      "surface": "math",
+      "family": "rare-edge",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "input scored 0.00024 <= 0.0005 (the spec rejects it)",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_p0.0002",
+      "surface": "math",
+      "family": "rare-edge",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_p0.0001",
+      "surface": "math",
+      "family": "rare-edge",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_faithful_0",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "rare_edge_faithful_1",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
       "popper_counterexample": "",
       "proof_checker_verdict": "FAITHFUL",
       "proof_checker_counterexample": ""

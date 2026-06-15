@@ -1,16 +1,16 @@
-"""falsify — the implementation package behind the **Popper** project.
+"""falsify - the implementation package behind the **Popper** project.
 
 Popper is the system: *falsify the spec, then verify the proof.* A Lean checker
-(and Axiom's AXLE) answers "is this proof valid?"; Popper adds the missing half —
-"is this statement faithful and worth proving?" — with a cheap, independent
+(and Axiom's AXLE) answers "is this proof valid?"; Popper adds the missing half -
+"is this statement faithful and worth proving?" - with a cheap, independent
 oracle that returns counterexamples, and a loop that repairs the statement.
 
 Code is organized by component (see folder → role):
-  * ``core``       — the shared spine: Verdict, Oracle, audit/report.
-  * ``montecarlo`` — numerical falsification of math statements.
-  * ``speccheck``  — offline code-spec oracle (soundness/completeness/vacuity).
-  * ``live``       — live spec-faithfulness audit of real Verina over AXLE.
-  * ``repair``     — counterexample-guided spec repair.
+  * ``core``       - the shared spine: Verdict, Oracle, audit/report.
+  * ``montecarlo`` - numerical falsification of math statements.
+  * ``speccheck``  - offline code-spec oracle (soundness/completeness/vacuity).
+  * ``live``       - live spec-faithfulness audit of real Verina over AXLE.
+  * ``repair``     - counterexample-guided spec repair.
 """
 
 from .core.oracle import Oracle, OracleResult, Verdict

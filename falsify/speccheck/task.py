@@ -1,8 +1,8 @@
 """The offline task model and its evaluator.
 
-* :class:`Task` — a Verina-style task carrying executable Python models so the
+* :class:`Task` - a Verina-style task carrying executable Python models so the
   oracle's decision logic runs without a Lean toolchain.
-* :class:`MockAxleClient` — evaluates the Python model over test + fuzzed inputs.
+* :class:`MockAxleClient` - evaluates the Python model over test + fuzzed inputs.
 
 The live counterpart (real Lean checking over the API) is
 :class:`falsify.live.axle.AxleClient`.

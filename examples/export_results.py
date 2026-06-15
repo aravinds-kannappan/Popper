@@ -33,13 +33,13 @@ def main() -> int:
 
     # 1. numerical oracle (math)
     rep = run_audit(information_theory_library(), NumericalOracle(),
-                    "Numerical oracle — information-theory ladder")
+                    "Numerical oracle - information-theory ladder")
     written += [rep.write_json(f"{RESULTS}/math_audit.json"),
                 rep.write_csv(f"{RESULTS}/math_audit.csv")]
 
     # 2. offline code-spec oracle
     rep = run_audit(verina_like_tasks(), CodeSpecOracle(MockAxleClient()),
-                    "Code-spec oracle — offline fixtures")
+                    "Code-spec oracle - offline fixtures")
     written += [rep.write_json(f"{RESULTS}/codespec_offline.json"),
                 rep.write_csv(f"{RESULTS}/codespec_offline.csv")]
 
@@ -62,7 +62,7 @@ def main() -> int:
         written += [live.write_json(f"{RESULTS}/verina_live.json"),
                     live.write_csv(f"{RESULTS}/verina_live.csv")]
     else:
-        print("(skipping live Verina audit — set AXLE_API_KEY and --live-limit > 0)")
+        print("(skipping live Verina audit - set AXLE_API_KEY and --live-limit > 0)")
 
     print("\nwrote:")
     for p in written:

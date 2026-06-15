@@ -16,10 +16,12 @@ I built Popper to attack that weak spot. Popper is an "oracle", which here just
 means a separate checker you can ask a yes-or-no question. The question is: can I
 break this statement? Popper tries hard to find an input that makes the statement
 fail, and when it finds one it gives you that input, which I call a
-counterexample. On a benchmark of 334 statements I labelled by hand, Popper flags
-every one of the 168 broken ones with a counterexample and raises no false alarms
-on the 163 good ones. A proof checker on its own flags none of them, because
-flagging a bad statement is not something a proof checker can do.
+counterexample. On a benchmark of 346 statements I labelled by hand, Popper flags
+176 of the 178 broken ones with a counterexample and raises no false alarms on the
+165 good ones. The two it misses are subtle bugs that only fail on about one input
+in ten thousand, and with a larger search budget it finds those too. A proof
+checker on its own flags none of them, because flagging a bad statement is not
+something a proof checker can do.
 
 ## 1. The problem, and why the proof checker misses it
 
@@ -84,17 +86,18 @@ check again, until it holds up or the budget runs out.
 
 ## 4. The benchmark
 
-I labelled 334 statements ahead of time as faithful or unfaithful, and for the
+I labelled 346 statements ahead of time as faithful or unfaithful, and for the
 unfaithful ones I recorded the kind of bug. Then I ran three checkers over the
 same set.
 
-- **math, 320 items.** Families of inequalities (Cauchy-Schwarz, AM-GM, the
+- **math, 332 items.** Families of inequalities (Cauchy-Schwarz, AM-GM, the
   triangle inequality, and several from information theory), each generated across
-  a range of sizes, with faithful and broken versions side by side, plus a few
-  "empty statement" traps. Checked by the local Monte-Carlo engine.
+  a range of sizes, with faithful and broken versions side by side, a few "empty
+  statement" traps, and a batch of subtle bugs that only fail on a small fraction
+  of inputs. Run for real by the local Monte-Carlo engine.
 - **code, 4 items.** The offline code-spec fixtures.
-- **verina, 10 items.** Real tasks checked live against AXLE, all meant to be
-  faithful, which measures the false-alarm rate.
+- **verina, 10 items.** Real tasks, with verdicts replayed from an earlier live
+  AXLE run, all meant to be faithful, which measures the false-alarm rate.
 
 The three checkers are the proof checker (accepts anything that is valid as a
 proof), an LLM judge (a model reads the statement and guesses, with no execution),
@@ -102,16 +105,30 @@ and Popper.
 
 | checker | unfaithful caught | false alarms | counterexample | F1 |
 |---|---|---|---|---|
-| Popper | 168/168 (100%) | 0/163 (0%) | every time | 1.00 |
-| Proof checker | 0/168 (0%) | 0/163 (0%) | never | 0.00 |
+| Popper | 176/178 (99%) | 0/165 (0%) | every time | 0.99 |
+| Proof checker | 0/178 (0%) | 0/165 (0%) | never | 0.00 |
 | LLM judge | runnable live | runnable live | never | runnable live |
 
-The proof checker scores zero no matter how strong the prover behind it is,
-because flagging a bad spec is outside what it does. The LLM judge can guess, but
-it never returns the input that breaks the spec. For a published number, the
-Verina paper puts the best general model near 52% on combined soundness and
-completeness. The full per-item table and the charts are in the repo and on the
-website.
+The score is 0.99 rather than a clean 1.00 on purpose, and that is the more
+honest result. Easy bugs, like a flipped inequality, fail on about half of all
+random inputs, so Popper catches them after a couple of draws. The subtle bugs
+fail on a tiny fraction of inputs, so finding them is a question of how many draws
+you spend. The benchmark records this as a sweep:
+
+| draws per statement | math recall | math F1 | subtle bugs caught | subtle-bug F1 |
+|---|---|---|---|---|
+| 100 | 98% | 0.99 | 6/10 | 0.75 |
+| 500 | 99% | 0.99 | 8/10 | 0.89 |
+| 2,000 | 99% | 0.99 | 8/10 | 0.89 |
+| 10,000 | 100% | 1.00 | 10/10 | 1.00 |
+| 50,000 | 100% | 1.00 | 10/10 | 1.00 |
+
+So F1 is a real number that moves with effort, not a fixed 1.00. The proof checker
+scores zero at every budget, because flagging a bad spec is outside what it does.
+The LLM judge can guess, but it never returns the input that breaks the spec. For
+a published number, the Verina paper puts the best general model near 52% on
+combined soundness and completeness. The full per-item table and the charts are in
+the repo and on the website.
 
 ## 5. What Popper adds
 

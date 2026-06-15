@@ -26,7 +26,7 @@ def main() -> int:
     oracle = NumericalOracle(n_trials=args.trials, seed=args.seed)
     report = run_audit(
         information_theory_library(), oracle,
-        title="Numerical oracle — information-theory ladder",
+        title="Numerical oracle - information-theory ladder",
     )
     print(report.render_markdown() if args.markdown else report.render_terminal())
     return 0

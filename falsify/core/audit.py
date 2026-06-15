@@ -40,7 +40,7 @@ class AuditReport:
         lines = [
             f"# {self.title}",
             "",
-            f"_oracle: `{self.oracle_name}` — {self.summary_line()}_",
+            f"_oracle: `{self.oracle_name}`, {self.summary_line()}_",
             "",
             "| | verdict | claim | reason / counterexample |",
             "|---|---|---|---|",
@@ -52,10 +52,10 @@ class AuditReport:
             )
         lines += [
             "",
-            "> Popper *falsifies*; it does not certify. A FAITHFUL verdict means "
-            "no counterexample was found within the search budget — the dominant "
-            "real-world failures (dropped hypotheses, vacuity, wrong direction, "
-            "too-strong/too-weak specs) are exactly what it catches.",
+            "> Popper breaks statements; it does not certify them. A FAITHFUL verdict means "
+            "no counterexample was found within the search budget. The common real-world "
+            "failures (dropped hypotheses, vacuity, wrong direction, too-loose or too-tight "
+            "specs) are exactly what it catches.",
         ]
         return "\n".join(lines)
 

@@ -37,7 +37,7 @@ def verina_like_tasks() -> list[Task]:
             "all_zeros":    lambda lst: [0] * len(lst),   # the throwaway impl
         },
         spec_py={
-            # BUG: only constrains length — says nothing about order or contents.
+            # BUG: only constrains length - says nothing about order or contents.
             "post_length_only": lambda args, out: len(out) == len(args[0]),
         },
         wrong_impls=["identity", "reverse"],

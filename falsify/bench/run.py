@@ -21,6 +21,8 @@ from .corpus import benchmark_corpus
 from .judges import llm_available, llm_judge, popper_judge, proof_checker_judge
 from .metrics import score_judge
 
+SWEEP_BUDGETS = (100, 500, 2000, 10000, 50000)
+
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(os.path.dirname(_HERE))
 _RESULTS = os.path.join(_ROOT, "results")
@@ -28,7 +30,40 @@ _REPORTS = os.path.join(_ROOT, "reports")
 _WEB_DATA = os.path.join(_ROOT, "web", "app", "data")
 
 
-def run_benchmark(*, with_llm: bool = False, n_trials: int = 2000, seed: int = 0) -> dict:
+def budget_sweep(budgets=SWEEP_BUDGETS, *, seed: int = 0) -> list[dict]:
+    """Run Popper on the math items at several search budgets.
+
+    Easy bugs (a flipped direction) break on half the random draws, so they are
+    caught at any budget. The subtle "rare-edge" bugs only fail on a small
+    fraction of inputs, so detecting them takes more draws. This sweep shows that
+    Popper's recall and F1 are a real function of effort, not a fixed 1.0.
+    """
+    # Only the unfaithful math items matter for recall. Popper never flags a
+    # faithful statement (its false-positive rate is zero in the main run, and
+    # more draws cannot break a statement that is exactly true), so precision
+    # stays 1 and we skip the expensive faithful items here.
+    items = [it for it in benchmark_corpus(("math",)) if it.gold_unfaithful]
+    rare = [it for it in items if it.family == "rare-edge"]
+    rows = []
+    for n in budgets:
+        allp = [(it, popper_judge(it, n_trials=n, seed=seed)) for it in items]
+        rarep = [(it, popper_judge(it, n_trials=n, seed=seed)) for it in rare]
+        s_all = score_judge("popper", allp)
+        s_rare = score_judge("popper", rarep)
+        rows.append({
+            "budget": n,
+            "recall": round(s_all.recall, 4),
+            "f1": round(s_all.f1, 4),
+            "rare_caught": s_rare.tp,
+            "rare_total": s_rare.n_unfaithful,
+            "rare_recall": round(s_rare.recall, 4),
+            "rare_f1": round(s_rare.f1, 4),
+        })
+    return rows
+
+
+def run_benchmark(*, with_llm: bool = False, n_trials: int = 2000, seed: int = 0,
+                  sweep: bool = True) -> dict:
     items = benchmark_corpus()
 
     judges = [("popper", lambda it: popper_judge(it, n_trials=n_trials, seed=seed)),
@@ -68,6 +103,8 @@ def run_benchmark(*, with_llm: bool = False, n_trials: int = 2000, seed: int = 0
         "scores": scores,
         "by_family": _family_breakdown(items, by_item),
         "by_surface": _surface_breakdown(items, by_item),
+        "headline_budget": n_trials,
+        "sweep": budget_sweep(seed=seed) if sweep else [],
         "rows": rows,
     }
     return out
@@ -178,6 +215,24 @@ def _markdown(out: dict) -> str:
         "- **Counterexample yield** is the fraction of true detections that came with a concrete "
         "witness you can act on. Only Popper produces these.\n"
     )
+
+    if out.get("sweep"):
+        lines.append("## Detection vs search budget\n")
+        lines.append(
+            "Easy bugs (a flipped inequality) break on half the random draws, so Popper catches "
+            "them at any budget. Subtle bugs that only fail on a small fraction of inputs need more "
+            "draws. This is why F1 is a real range, not a fixed 1.00: at a small budget Popper "
+            "misses the rarest bugs, and recall climbs toward 1 as the budget grows. The headline "
+            f"table above uses a budget of {out.get('headline_budget')} draws per statement.\n"
+        )
+        lines.append("| draws per statement | math recall | math F1 | subtle bugs caught | subtle-bug F1 |")
+        lines.append("|---|---|---|---|---|")
+        for r in out["sweep"]:
+            lines.append(
+                f"| {r['budget']} | {r['recall']:.0%} | {r['f1']:.2f} | "
+                f"{r['rare_caught']}/{r['rare_total']} ({r['rare_recall']:.0%}) | {r['rare_f1']:.2f} |"
+            )
+        lines.append("")
 
     lines.append("## By kind of bug\n")
     lines.append("| bug | count | " + " | ".join(pretty.get(j, j) for j in judges) + " |")

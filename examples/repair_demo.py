@@ -26,12 +26,12 @@ def main() -> int:
     traces = [repair_loop(t, oracle, default_repairer()) for t in verina_like_tasks()]
 
     if args.markdown:
-        print("# M2 — counterexample-guided spec repair\n")
+        print("# M2 - counterexample-guided spec repair\n")
         print("| task | verdict path | repaired? |")
         print("|---|---|---|")
         for tr in traces:
             path = " → ".join(f"`{r.verdict.value}`" for r in tr.rounds)
-            print(f"| `{tr.task}` | {path} | {'✅' if tr.success else '—'} |")
+            print(f"| `{tr.task}` | {path} | {'✅' if tr.success else '-'} |")
     else:
         print("\n=== M2: counterexample-guided spec repair ===\n")
         for tr in traces:

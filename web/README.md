@@ -1,10 +1,10 @@
-# Popper — web demo + Claude agent
+# Popper: web demo + Claude agent
 
 An interactive site for [Popper](../README.md): the trust ladder, live audit results, and a
 **Claude agent** that reasons the Popper way (falsify first) and runs the **Axiom Lean Engine
 (AXLE)** live from the browser.
 
-The agent is general-purpose Claude (Opus 4.8) — ask it any math or coding question. Its system
+The agent is general-purpose Claude (Opus 4.8). Ask it any math or coding question. Its system
 prompt (`app/api/chat/route.ts`) makes the **Popper method its default**: for checkable claims it
 calls `disprove_lean` (AXLE) and reports the real counterexample instead of just asserting, and it
 distinguishes *verified* vs *falsified* vs *not-falsified*.
@@ -63,4 +63,4 @@ npx vercel --prod
 - The chat route sets `maxDuration = 60`. Lean checks that pull in Mathlib can be slow; on the
   Vercel Hobby plan, function duration is capped (raise it on Pro). The agent uses
   `ignore_imports` so core-Lean statements stay fast.
-- Keys live only in Vercel env vars / `.env.local` — never commit them (`.env*` is git-ignored).
+- Keys live only in Vercel env vars or `.env.local`; never commit them (`.env*` is git-ignored).
