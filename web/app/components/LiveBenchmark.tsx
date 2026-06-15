@@ -6,7 +6,7 @@ import type { Interaction } from "./Chat";
 const COLORS: Record<string, string> = {
   "Popper agent": "#3fb950",
   "Opus (no tools)": "#7aa2ff",
-  "Haiku (no tools)": "#d29922",
+  "AXLE alone": "#d29922",
 };
 
 type CI = { mean: number; lo: number; hi: number };
@@ -16,7 +16,7 @@ type Sys = {
   ci: Record<string, CI>;
 };
 type Data = {
-  model: string; small_model: string; ran_at: string; n_messages: number; n_scored: number;
+  model: string; ran_at: string; n_messages: number; n_scored: number;
   bootstrap_samples: number; axle_decided: number; axle_used: number; systems: Sys[]; items: any[];
 };
 
@@ -98,9 +98,9 @@ export default function LiveBenchmark({ interactions }: { interactions: Interact
       <h3 className="h3" style={{ marginTop: 0 }}>Live benchmark from your conversation</h3>
       <p className="note" style={{ marginTop: 0 }}>
         Built from the {interactions.length} message{interactions.length === 1 ? "" : "s"} you just sent.
-        For each one, two other models answer with no tools, and an evaluator agent decides the truth
-        (using what AXLE found in your chat as the authority) and grades everyone. The 10 results are
-        then bootstrapped to 500 resamples for confidence intervals.
+        For each one, a plain model (Opus, no tools) answers, AXLE on its own contributes its raw
+        result from your chat, and an evaluator agent decides the truth and grades everyone. The
+        results are then bootstrapped to 500 resamples for confidence intervals.
       </p>
 
       {!data && (
@@ -118,8 +118,9 @@ export default function LiveBenchmark({ interactions }: { interactions: Interact
         <>
           <p className="note">
             {data.n_scored} of {data.n_messages} messages were checkable claims and got scored. AXLE
-            decided {data.axle_decided} of them outright (from your chat). Graded by {data.model};
-            baselines {data.model} and {data.small_model}; bootstrapped to {data.bootstrap_samples} resamples.
+            on its own broke {data.axle_decided} of them outright (from your chat). Graded by{" "}
+            {data.model}; the plain baseline is {data.model} with no tools; bootstrapped to{" "}
+            {data.bootstrap_samples} resamples.
           </p>
 
           <div className="chart-grid">
@@ -153,7 +154,7 @@ export default function LiveBenchmark({ interactions }: { interactions: Interact
           <div className="panel">
             <table>
               <thead>
-                <tr><th>your message</th><th>truth</th>{data.systems.map((s) => <th key={s.name}>{s.name.replace(" (no tools)", "")}</th>)}<th>AXLE</th></tr>
+                <tr><th>your message</th><th>truth</th>{data.systems.map((s) => <th key={s.name}>{s.name.replace(" (no tools)", "")}</th>)}</tr>
               </thead>
               <tbody>
                 {data.items.map((it, i) => (
@@ -164,7 +165,6 @@ export default function LiveBenchmark({ interactions }: { interactions: Interact
                       const g = it.grades[s.name];
                       return <td key={s.name}>{g ? <span className={`badge ${g.correct ? "faithful" : "bad"}`}>{g.verdict}</span> : "-"}</td>;
                     })}
-                    <td className="mono" style={{ color: "var(--muted)" }}>{it.axle_disproved ? "broke it" : it.axle_used ? "no break" : "-"}</td>
                   </tr>
                 ))}
               </tbody>

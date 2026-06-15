@@ -13,7 +13,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 export const BIG_MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
-export const SMALL_MODEL = process.env.ANTHROPIC_SMALL_MODEL || "claude-haiku-4-5-20251001";
 
 const PLAIN_SYSTEM = `You are a careful mathematical assistant with no tools. Decide whether the
 user's claim is true or false using your own reasoning. Be concise. End with exactly one line:

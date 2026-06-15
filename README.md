@@ -220,13 +220,16 @@ tries to break the claim through AXLE and shows the real result.
 
 The interesting part is that the benchmark is built from that conversation, not
 from a canned set. After you send 10 messages, a live benchmark unlocks below the
-chat. For each of your questions it runs two more models with no tools (a large
-and a small one), and then a separate evaluator agent decides the true answer
-(treating what AXLE found in your chat as authoritative) and grades every system.
-Those grades become the metrics: accuracy, F1, MCC (Matthews correlation
-coefficient, a balanced score in -1 to 1), counterexample yield, and average
-quality, one row per system, so the numbers come out as a real spread rather than
-a fixed score. The 10 graded results are then bootstrapped to 500 resamples to put
+chat. The three systems compared are the Popper agent (Opus with AXLE and the
+falsificationist reasoning), the same model on its own with no tools, and AXLE by
+itself (the bare prover, no agent, using its raw counterexample search result from
+your chat). A separate evaluator agent decides the true answer (treating what AXLE
+found in your chat as authoritative) and grades them. Those grades become the
+metrics: accuracy, F1, MCC (Matthews correlation coefficient, a balanced score in
+-1 to 1), counterexample yield, and average quality, one row per system, so the
+numbers come out as a real spread rather than a fixed score. Seeing AXLE on its
+own is the point: it can refute a false claim when the witness is small, but it
+cannot confirm a true one, which is the gap the Popper agent fills. The 10 graded results are then bootstrapped to 500 resamples to put
 honest confidence intervals on each metric. ("Scaling 10 to 500" means resampling
 for tighter estimates, not inventing 500 new data points.)
 
@@ -250,10 +253,9 @@ project settings):
   Axiom Lean Engine (`web/app/lib/axle.ts`).
 
 Both are read server-side only and are never sent to the browser. The full list,
-including the optional `ANTHROPIC_MODEL`, `ANTHROPIC_SMALL_MODEL` (the small
-baseline in the live benchmark), `AXLE_ENVIRONMENT`, and `AXLE_BASE_URL`, is in
-[`web/.env.example`](./web/.env.example). The agent and AXLE wiring is unchanged,
-so if those keys are already set on Vercel everything keeps working.
+including the optional `ANTHROPIC_MODEL`, `AXLE_ENVIRONMENT`, and `AXLE_BASE_URL`,
+is in [`web/.env.example`](./web/.env.example). The agent and AXLE wiring is
+unchanged, so if those keys are already set on Vercel everything keeps working.
 
 ## A note on honesty
 
