@@ -63,6 +63,58 @@ What Popper adds that the others do not have: it looks at the spec, not the proo
 and when it finds a problem it gives you a concrete counterexample instead of a
 score or a shrug.
 
+## Popper and AxiomProver
+
+Axiom Math ships two things I lean on here. [AXLE](https://axle.axiommath.ai) is
+the Lean engine, the API that type-checks a statement and runs the counterexample
+search. AxiomProver is the prover: an agent that takes a statement and searches for
+a full Lean proof of it, and it is very strong at that (it clears competition-level
+problems and most of Verina's proof task). Popper is not a competitor to either. It
+answers a different question and sits in front of the prover.
+
+The split is clean:
+
+- **AxiomProver answers "can this statement be proved, and here is the proof."**
+  It is the verifier. Its blind spot is the statement itself: it will prove
+  whatever you hand it, faithful or not.
+- **Popper answers "is this statement the right one to prove."** It is the screen.
+  It does not produce proofs and it does not certify; it tries to break the spec
+  and hands back a counterexample when it can.
+
+Why I think Popper is worth running before AxiomProver, and why it saves compute:
+
+- **Proving is expensive; breaking is cheap.** A proof search is heavy compute. A
+  Monte-Carlo pass or a handful of witness checks is not. It is wasteful to point
+  the expensive tool at a statement the cheap tool can already show is wrong.
+- **A vacuous or too-weak spec proves easily, and certifies nothing.** AxiomProver
+  would return a clean proof of "for all x, true" or of "sorted means same length,"
+  and you would walk away thinking you verified something. Popper catches that
+  before any proof compute is spent, so you do not burn a proof on a statement that
+  guarantees nothing.
+- **A wrong or too-strong spec is unprovable, and the prover can grind on it.**
+  AxiomProver may spend a large search budget failing to prove a statement that is
+  false because the spec has a bug. Popper finds the breaking input quickly and
+  says "fix the spec," so the compute goes to repairing the statement instead of
+  hunting for a proof that cannot exist.
+- **The counterexample is the repair signal.** The loop is: Popper breaks the
+  spec, you (or a model) fix it using the witness, and only then does AxiomProver
+  prove the fixed statement. That is the "falsify the spec, then verify the proof"
+  idea, with Popper as the gate.
+
+| | AxiomProver | Popper |
+|---|---|---|
+| Question | Can this statement be proved? | Is this the right statement to prove? |
+| Method | Search for a Lean proof | Try to break the statement |
+| Output | A proof, or failure | A counterexample, or "no break found" |
+| Cost | High | Low |
+| Blind to | Whether the statement is faithful | It does not prove or certify |
+| Role | The verifier | The screen in front of the verifier |
+
+So the two are complementary. Popper makes sure AxiomProver's compute is spent on
+statements that are worth proving, and AxiomProver gives the real proof once the
+statement holds up. On the website, AXLE is the engine Popper drives, and the live
+agent shows the screening half in action.
+
 ## How it works
 
 There is one common interface (`falsify/core/oracle.py`) and two engines behind

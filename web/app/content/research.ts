@@ -107,6 +107,23 @@ judge can guess, but it never returns the input that breaks the spec.
 3. A clean training signal: the counterexample that fixes a spec is also a reward.
 4. Honest "I don't know" when a spec cannot be decided on a case, instead of a guess.
 
+## Popper and AxiomProver
+
+Axiom Math ships AXLE (the Lean engine that type-checks and runs the
+counterexample search) and AxiomProver (an agent that searches for a full Lean
+proof, and is very strong at it). Popper is not a competitor. AxiomProver answers
+"can this be proved, here is the proof"; Popper answers "is this the right
+statement to prove." So Popper belongs in front of the prover.
+
+The reason is compute. Proof search is expensive; breaking a statement by sampling
+is cheap. A vacuous or too-weak spec proves easily and certifies nothing, so the
+prover would hand back a clean proof of a statement that guarantees nothing. A
+wrong or too-strong spec is unprovable, so the prover can burn a large budget
+failing on a statement that is false because the spec has a bug. Popper settles
+both cheaply up front, and its counterexample drives the repair. The loop is:
+Popper breaks the spec, the witness fixes it, AxiomProver proves it once it holds
+up. Popper keeps the prover's compute on statements worth proving.
+
 ## Limits
 
 Popper breaks statements; it does not certify them. A FAITHFUL verdict means no

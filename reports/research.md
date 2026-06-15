@@ -141,7 +141,46 @@ the repo and on the website.
 4. Honest "I don't know". When a spec cannot be decided on a test case, Popper says
    INCONCLUSIVE instead of pretending.
 
-## 6. Limits
+## 6. Popper and AxiomProver
+
+Axiom Math ships two pieces I build on. AXLE is the Lean engine: the API that
+type-checks a statement and runs the counterexample search. AxiomProver is the
+prover, an agent that takes a statement and searches for a full Lean proof, and it
+is very strong at that step. Popper is not a competitor to either. It answers a
+different question and belongs in front of the prover.
+
+The two answer different questions. AxiomProver answers "can this statement be
+proved, and here is the proof." It is the verifier, and its blind spot is the
+statement: it will prove whatever it is handed, faithful or not. Popper answers "is
+this the right statement to prove." It is the screen, it does not produce proofs,
+and it tries to break the spec and return a witness.
+
+The practical reason to run Popper first is compute. Proof search is expensive;
+breaking a statement with sampling or a few witness checks is cheap, so pointing
+the expensive tool at a statement the cheap tool already refutes is waste. Two
+failure modes make this concrete. A vacuous or too-weak spec proves easily and
+certifies nothing, so AxiomProver would hand back a clean proof of a statement that
+guarantees nothing, and the work looks done when it is not. A wrong or too-strong
+spec is unprovable, so AxiomProver can spend a large budget failing to prove
+something that is false because the spec has a bug. In both cases Popper settles it
+cheaply up front: it flags the empty spec before any proof is attempted, and it
+finds the breaking input for the wrong one and says to repair the spec rather than
+chase a proof that cannot exist.
+
+| | AxiomProver | Popper |
+|---|---|---|
+| Question | Can this be proved? | Is this the right statement? |
+| Method | Search for a Lean proof | Try to break the statement |
+| Output | A proof, or failure | A counterexample, or no break |
+| Cost | High | Low |
+| Blind to | Whether the statement is faithful | It does not prove or certify |
+| Role | Verifier | Screen in front of the verifier |
+
+So the loop is: Popper breaks the spec, the witness drives a repair, and
+AxiomProver proves the statement once it holds up. Popper keeps the prover's
+compute on statements that are worth proving, and the prover gives the real proof.
+
+## 7. Limits
 
 Popper breaks statements; it does not certify them. A FAITHFUL verdict means no
 counterexample was found within the budget, not that none exists, and proving none
@@ -150,7 +189,7 @@ tiny set of inputs, though dropped assumptions and flipped directions are exactl
 the bugs that show up under sampling. Lean and AXLE stay the final word on the
 proof itself.
 
-## 7. Next
+## 8. Next
 
 - Run the repair loop inside the live AXLE path, swapping the fixed spec back in
   and checking again.
