@@ -212,22 +212,48 @@ export AXLE_API_KEY=...                                 # https://axle.axiommath
 python examples/verina_live_audit.py --limit 8
 ```
 
+## The live demo and its benchmark
+
+The website opens on a Live demo: the Popper agent chat is front and center, which
+is Popper in action. Ask it math or logic claims; for anything it can check it
+tries to break the claim through AXLE and shows the real result.
+
+The interesting part is that the benchmark is built from that conversation, not
+from a canned set. After you send 10 messages, a live benchmark unlocks below the
+chat. For each of your questions it runs two more models with no tools (a large
+and a small one), and then a separate evaluator agent decides the true answer
+(treating what AXLE found in your chat as authoritative) and grades every system.
+Those grades become the metrics: accuracy, F1, MCC (Matthews correlation
+coefficient, a balanced score in -1 to 1), counterexample yield, and average
+quality, one row per system, so the numbers come out as a real spread rather than
+a fixed score. The 10 graded results are then bootstrapped to 500 resamples to put
+honest confidence intervals on each metric. ("Scaling 10 to 500" means resampling
+for tighter estimates, not inventing 500 new data points.)
+
+This is a different measurement from the offline benchmark above. The offline one
+asks whether the detection engine catches planted bugs. The live one asks how the
+agent does on your real questions, next to plain models and with AXLE in the loop.
+The code is in `web/app/api/benchmark/route.ts`, `web/app/lib/agent.ts` (the plain
+baselines and the evaluator agent), and `web/app/components/AgentLab.tsx`.
+
 ## The website and its API keys
 
-The site in [`web/`](./web) has an Overview, the Benchmark with charts, the audit
-results, the Research write-up, and a live Claude agent. To be clear about keys:
-the local math benchmark needs none, but the deployed site does need two, set as
-environment variables (on Vercel, in the project settings):
+The site in [`web/`](./web) has the Live demo, an Overview, the offline oracle
+benchmark with charts, the audit results, the Research write-up, and the live
+Claude agent. To be clear about keys: the local math benchmark needs none, but the
+deployed site does need two, set as environment variables (on Vercel, in the
+project settings):
 
-- `ANTHROPIC_API_KEY` powers the Claude agent (`web/app/api/chat/route.ts`).
+- `ANTHROPIC_API_KEY` powers the Claude agent (`web/app/api/chat/route.ts`) and
+  the live benchmark (`web/app/api/benchmark/route.ts`).
 - `AXLE_API_KEY` powers the agent's live disprove and check tools against the
   Axiom Lean Engine (`web/app/lib/axle.ts`).
 
 Both are read server-side only and are never sent to the browser. The full list,
-including the optional `ANTHROPIC_MODEL`, `AXLE_ENVIRONMENT`, and `AXLE_BASE_URL`,
-is in [`web/.env.example`](./web/.env.example). I did not change any of this
-wiring, so if those keys are already set on Vercel the agent and live AXLE keep
-working.
+including the optional `ANTHROPIC_MODEL`, `ANTHROPIC_SMALL_MODEL` (the small
+baseline in the live benchmark), `AXLE_ENVIRONMENT`, and `AXLE_BASE_URL`, is in
+[`web/.env.example`](./web/.env.example). The agent and AXLE wiring is unchanged,
+so if those keys are already set on Vercel everything keeps working.
 
 ## A note on honesty
 
