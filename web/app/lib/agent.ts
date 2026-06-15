@@ -1,214 +1,110 @@
-// The three roles used by the live benchmark, all backed by Claude:
+// The models used by the live benchmark.
 //
-//   * runPopperAgent  -- Claude with live AXLE tools. It reasons the Popper way:
-//                        for a checkable claim it tries to break it with AXLE first
-//                        and reports the real counterexample.
-//   * runPlainLLM     -- Claude with no tools, answering from its own knowledge.
-//                        This is the "model on its own" baseline.
-//   * runEvaluator    -- a separate Claude that grades both answers against the
-//                        known ground truth. This is the layer that turns the
-//                        agent's behaviour into the numbers the benchmark compares.
+//   * runPlainModel -- Claude with NO tools, answering from its own knowledge.
+//                      Used for the comparison baselines (a large and a small model).
+//   * runEvaluator  -- a separate Claude that, for each question, decides the true
+//                      answer (treating AXLE's finding from the chat as authoritative
+//                      when present) and grades every system's answer. This is the
+//                      layer that turns the chat into the numbers the benchmark uses.
 //
-// Each system ends its answer with a VERDICT line, and FALSE answers add a
-// COUNTEREXAMPLE line, which keeps parsing simple and robust.
+// The Popper agent's own answers are not produced here; they come straight from the
+// chat the user already had, so the benchmark is built from real interactions.
 
 import Anthropic from "@anthropic-ai/sdk";
-import { axleCheck, axleDisprove } from "./axle";
 
-export const AGENT_MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
+export const BIG_MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
+export const SMALL_MODEL = process.env.ANTHROPIC_SMALL_MODEL || "claude-haiku-4-5-20251001";
 
-export type Answer = {
-  verdict: "TRUE" | "FALSE" | "UNSURE";
-  counterexample: string;
-  text: string;
-  usedAxle: boolean;
-  axleFoundCounterexample: boolean;
-};
+const PLAIN_SYSTEM = `You are a careful mathematical assistant with no tools. Decide whether the
+user's claim is true or false using your own reasoning. Be concise. End with exactly one line:
+VERDICT: TRUE | FALSE | UNSURE
+If FALSE, add: COUNTEREXAMPLE: <one concrete witness>`;
 
-const VERDICT_RE = /VERDICT:\s*(TRUE|FALSE|UNSURE)/i;
-const CE_RE = /COUNTEREXAMPLE:\s*(.+)/i;
+export type PlainAnswer = { text: string; model: string };
 
-function parseAnswer(text: string, usedAxle: boolean, axleHit: boolean): Answer {
-  const v = (text.match(VERDICT_RE)?.[1] || "UNSURE").toUpperCase() as Answer["verdict"];
-  const ce = (text.match(CE_RE)?.[1] || "").trim();
-  return { verdict: v, counterexample: ce, text: text.trim(), usedAxle, axleFoundCounterexample: axleHit };
-}
-
-const FORMAT = `End your reply with exactly one line:
-VERDICT: TRUE   (the claim holds)   or   VERDICT: FALSE   or   VERDICT: UNSURE
-If the verdict is FALSE, add one more line:
-COUNTEREXAMPLE: <one concrete input that breaks the claim>`;
-
-const POPPER_SYSTEM = `You are the Popper agent. Your job is to decide whether a mathematical claim is
-true, and you are a falsificationist: for any claim you can express in Lean, TRY TO BREAK IT with
-disprove_lean before asserting it is true, and lead with what AXLE actually found. Prefer a concrete
-counterexample over a verbal argument. Keep Lean snippets small and decidable (over Nat or Int) so a
-counterexample can be found. Be concise.
-
-${FORMAT}`;
-
-const PLAIN_SYSTEM = `You are a careful mathematical assistant. Decide whether the claim is true using
-your own reasoning. You have no tools. Be concise.
-
-${FORMAT}`;
-
-const TOOLS = [
-  {
-    name: "disprove_lean",
-    description:
-      "Attempt to FALSIFY a Lean 4 statement by searching for a counterexample via AXLE. Provide a full theorem ending in ':= by sorry'. Add 'import Mathlib' only if needed.",
-    input_schema: {
-      type: "object",
-      properties: { statement: { type: "string", description: "A Lean 4 theorem to attempt to disprove." } },
-      required: ["statement"],
-    },
-  },
-  {
-    name: "check_lean",
-    description: "Compile/type-check Lean 4 code via AXLE; reports whether it is okay and any errors.",
-    input_schema: {
-      type: "object",
-      properties: { code: { type: "string", description: "Lean 4 code to check." } },
-      required: ["code"],
-    },
-  },
-];
-
-async function runTool(name: string, input: any): Promise<{ out: string; axleHit: boolean }> {
-  if (name === "disprove_lean") {
-    const r = await axleDisprove(String(input?.statement || ""));
-    const hit = r.disproved.length > 0;
-    const detail = Object.values(r.results || {}).join("\n") || "(no counterexample found within budget)";
-    return { out: JSON.stringify({ disproved: hit, disproved_theorems: r.disproved, detail }), axleHit: hit };
-  }
-  if (name === "check_lean") {
-    const r = await axleCheck(String(input?.code || ""));
-    return { out: JSON.stringify({ okay: r.okay, failed: r.failed, errors: r.messages?.errors || [] }), axleHit: false };
-  }
-  return { out: JSON.stringify({ error: `unknown tool ${name}` }), axleHit: false };
-}
-
-export async function runPopperAgent(question: string, client: Anthropic, model = AGENT_MODEL): Promise<Answer> {
-  const convo: any[] = [{ role: "user", content: question }];
-  let usedAxle = false;
-  let axleHit = false;
-  let response: any;
-
-  for (let i = 0; i < 3; i++) {
-    response = await client.messages.create({
-      model,
-      max_tokens: 1024,
-      system: POPPER_SYSTEM,
-      tools: TOOLS as any,
-      messages: convo,
-    } as any);
-    if (response.stop_reason !== "tool_use") break;
-    convo.push({ role: "assistant", content: response.content });
-    const toolResults: any[] = [];
-    for (const block of response.content) {
-      if (block.type === "tool_use") {
-        usedAxle = true;
-        let res: { out: string; axleHit: boolean };
-        try {
-          res = await runTool(block.name, block.input || {});
-        } catch (e: any) {
-          res = { out: JSON.stringify({ error: String(e?.message || e) }), axleHit: false };
-        }
-        axleHit = axleHit || res.axleHit;
-        toolResults.push({ type: "tool_result", tool_use_id: block.id, content: res.out });
-      }
-    }
-    convo.push({ role: "user", content: toolResults });
-  }
-
-  const text = (response?.content || [])
-    .filter((b: any) => b.type === "text")
-    .map((b: any) => b.text)
-    .join("\n");
-  return parseAnswer(text, usedAxle, axleHit);
-}
-
-export async function runPlainLLM(question: string, client: Anthropic, model = AGENT_MODEL): Promise<Answer> {
-  const response: any = await client.messages.create({
+export async function runPlainModel(question: string, client: Anthropic, model: string): Promise<PlainAnswer> {
+  const r: any = await client.messages.create({
     model,
-    max_tokens: 700,
+    max_tokens: 600,
     system: PLAIN_SYSTEM,
     messages: [{ role: "user", content: question }],
   } as any);
-  const text = (response?.content || [])
-    .filter((b: any) => b.type === "text")
-    .map((b: any) => b.text)
-    .join("\n");
-  return parseAnswer(text, false, false);
+  const text = (r?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n");
+  return { text: text.trim(), model };
 }
 
 export type Grade = {
-  conclusion_correct: boolean;
-  counterexample_valid: boolean | null; // null when no counterexample was needed/given
+  verdict: "TRUE" | "FALSE" | "UNSURE";
+  counterexample_valid: boolean | null;
   quality: number; // 1..5
-  note: string;
 };
 
-const EVAL_SYSTEM = `You grade two answers to a math claim, given the ground truth. You are strict and
-fair. For each answer report, as JSON only:
+export type Evaluation = {
+  truth: "TRUE" | "FALSE" | "NA"; // NA = not a checkable true/false claim
+  reference_counterexample: string;
+  grades: Record<string, Grade>;  // keyed by system name
+};
+
+const EVAL_SYSTEM = `You are a strict evaluator. You are given a math/logic claim, what an AXLE Lean
+prover found about it (this is AUTHORITATIVE: if AXLE returned a counterexample the claim is FALSE
+with that witness; if AXLE checked it and found none on a decidable statement, lean TRUE), and one or
+more system answers. Decide the truth and grade each answer. Output JSON ONLY:
 {
-  "popper": {"conclusion_correct": bool, "counterexample_valid": bool|null, "quality": 1-5, "note": "short"},
-  "plain":  {"conclusion_correct": bool, "counterexample_valid": bool|null, "quality": 1-5, "note": "short"}
+  "truth": "TRUE" | "FALSE" | "NA",
+  "reference_counterexample": "string (empty if none)",
+  "grades": {
+    "<system name>": {"verdict": "TRUE"|"FALSE"|"UNSURE", "counterexample_valid": true|false|null, "quality": 1-5}
+  }
 }
-- conclusion_correct: did the answer reach the right TRUE/FALSE conclusion? An UNSURE answer is not correct.
-- counterexample_valid: if the claim is FALSE, did the answer give a concrete, correct counterexample?
-  Use true/false. Use null if the claim is TRUE (no counterexample is needed).
-- quality: 1 (wrong or empty) to 5 (correct conclusion with a valid, concrete justification).
-Output JSON only, no prose.`;
+- truth = NA if the claim is not a checkable true/false statement (e.g. an opinion or open question).
+- For each system: read its effective verdict from its text; counterexample_valid is whether any
+  counterexample it gave is concrete and correct (null if truth is TRUE or none was needed);
+  quality is 1 (wrong/empty) to 5 (right conclusion with a valid, concrete justification).
+Output JSON only.`;
 
 export async function runEvaluator(
-  item: { question: string; truth: string; counterexample?: string },
-  popper: Answer,
-  plain: Answer,
+  question: string,
+  axleHint: string,
+  answers: { name: string; text: string }[],
   client: Anthropic,
-  model = AGENT_MODEL
-): Promise<{ popper: Grade; plain: Grade }> {
-  const prompt = `CLAIM: ${item.question}
-GROUND TRUTH: the claim is ${item.truth}${item.counterexample ? ` (a valid counterexample: ${item.counterexample})` : ""}
-
-POPPER AGENT ANSWER:
-${popper.text || "(empty)"}
-
-PLAIN MODEL ANSWER:
-${plain.text || "(empty)"}
-
-Grade both as specified.`;
-
-  const response: any = await client.messages.create({
+  model: string = BIG_MODEL
+): Promise<Evaluation> {
+  const body =
+    `CLAIM: ${question}\n\nAXLE FINDING: ${axleHint || "(AXLE was not used for this one)"}\n\n` +
+    answers.map((a) => `SYSTEM "${a.name}" ANSWER:\n${a.text || "(empty)"}`).join("\n\n") +
+    `\n\nGrade every system named above.`;
+  const r: any = await client.messages.create({
     model,
-    max_tokens: 700,
+    max_tokens: 800,
     system: EVAL_SYSTEM,
-    messages: [{ role: "user", content: prompt }],
+    messages: [{ role: "user", content: body }],
   } as any);
-  const text = (response?.content || [])
-    .filter((b: any) => b.type === "text")
-    .map((b: any) => b.text)
-    .join("\n");
-  return parseGrades(text, item.truth, popper, plain);
+  const text = (r?.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n");
+  return parseEval(text, answers.map((a) => a.name));
 }
 
-function fallbackGrade(truth: string, a: Answer): Grade {
-  const correct = a.verdict === truth;
-  const ceValid = truth === "FALSE" ? a.counterexample.length > 0 : null;
-  return { conclusion_correct: correct, counterexample_valid: ceValid, quality: correct ? 3 : 1, note: "parsed without evaluator" };
-}
-
-function parseGrades(text: string, truth: string, popper: Answer, plain: Answer): { popper: Grade; plain: Grade } {
+function parseEval(text: string, names: string[]): Evaluation {
   try {
     const obj = JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1));
-    const norm = (g: any): Grade => ({
-      conclusion_correct: !!g.conclusion_correct,
-      counterexample_valid: g.counterexample_valid === null ? null : !!g.counterexample_valid,
-      quality: Math.max(1, Math.min(5, Number(g.quality) || 1)),
-      note: String(g.note || ""),
-    });
-    return { popper: norm(obj.popper), plain: norm(obj.plain) };
+    const grades: Record<string, Grade> = {};
+    for (const n of names) {
+      const g = (obj.grades || {})[n] || {};
+      const v = String(g.verdict || "UNSURE").toUpperCase();
+      grades[n] = {
+        verdict: (["TRUE", "FALSE", "UNSURE"].includes(v) ? v : "UNSURE") as Grade["verdict"],
+        counterexample_valid: g.counterexample_valid === null || g.counterexample_valid === undefined ? null : !!g.counterexample_valid,
+        quality: Math.max(1, Math.min(5, Number(g.quality) || 1)),
+      };
+    }
+    const truth = String(obj.truth || "NA").toUpperCase();
+    return {
+      truth: (["TRUE", "FALSE", "NA"].includes(truth) ? truth : "NA") as Evaluation["truth"],
+      reference_counterexample: String(obj.reference_counterexample || ""),
+      grades,
+    };
   } catch {
-    return { popper: fallbackGrade(truth, popper), plain: fallbackGrade(truth, plain) };
+    const grades: Record<string, Grade> = {};
+    for (const n of names) grades[n] = { verdict: "UNSURE", counterexample_valid: null, quality: 1 };
+    return { truth: "NA", reference_counterexample: "", grades };
   }
 }

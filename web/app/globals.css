@@ -104,6 +104,12 @@ td.mono, .mono { font-family: var(--mono); }
 .note { color: var(--muted); font-size: 13px; }
 .foot { margin-top: 48px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
 
+/* message gate */
+.gate { display: flex; align-items: center; gap: 12px; margin: 14px 0 16px; }
+.gate-bar { flex: 1; height: 8px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+.gate-fill { height: 100%; background: var(--accent); transition: width 0.3s ease; }
+.gate-label { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+
 /* charts */
 .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-bottom: 14px; }
 .chart { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }

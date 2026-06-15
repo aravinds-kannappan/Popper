@@ -7,14 +7,34 @@ type Role = "user" | "assistant" | "error";
 type ToolCall = { name: string; input: any; output: any };
 type Msg = { role: Role; content: string; toolCalls?: ToolCall[] };
 
+export type Interaction = {
+  question: string;
+  popperText: string;
+  axleUsed: boolean;
+  axleDisproved: boolean;
+  axleDetail: string;
+};
+
 const EXAMPLES = [
   "Is ∀ n : Nat, n < 5 true? Check it.",
   "Try to break: ∀ a b : Nat, a - b + b = a",
-  "Why can a fully proved spec still be wrong?",
-  "Show me the live Verina results.",
+  "Is n^2 - n + 41 prime for every natural number n?",
+  "Is 2^n > n^2 for every n ≥ 1?",
 ];
 
-export default function Chat() {
+function readAxle(toolCalls: ToolCall[] = []): { used: boolean; disproved: boolean; detail: string } {
+  let used = false, disproved = false, detail = "";
+  for (const t of toolCalls) {
+    used = true;
+    if (t.name === "disprove_lean") {
+      const out: any = t.output || {};
+      if (out.disproved) { disproved = true; detail = String(out.detail || "").slice(0, 300); }
+    }
+  }
+  return { used, disproved, detail };
+}
+
+export default function Chat({ onTurn }: { onTurn?: (i: Interaction) => void }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -49,6 +69,10 @@ export default function Chat() {
         setMsgs((m) => [...m, { role: "error", content: `Error: ${data.error || res.statusText}` }]);
       } else {
         setMsgs((m) => [...m, { role: "assistant", content: data.reply, toolCalls: data.toolCalls }]);
+        if (onTurn) {
+          const ax = readAxle(data.toolCalls);
+          onTurn({ question: q, popperText: String(data.reply || ""), axleUsed: ax.used, axleDisproved: ax.disproved, axleDetail: ax.detail });
+        }
       }
     } catch (e: any) {
       setMsgs((m) => [...m, { role: "error", content: `Network error: ${String(e?.message || e)}` }]);

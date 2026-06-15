@@ -1,110 +1,125 @@
-// Live benchmark. Runs when the Benchmark tab loads.
+// Live benchmark built from the user's real chat.
 //
-// For each claim in the eval set it runs two systems live: the Popper agent
-// (Claude + live AXLE), and a plain model (Claude, no tools). A third Claude, the
-// evaluator agent, grades both answers against the known ground truth. The grades
-// become the metrics the page compares. This needs ANTHROPIC_API_KEY and, for the
-// Popper agent's AXLE tools, AXLE_API_KEY, both set as server env vars on Vercel.
+// The client sends the interactions the user already had with the Popper agent:
+// each one carries the question, the Popper agent's answer, and what AXLE found
+// (read from the chat's tool calls). For each question this route runs two more
+// systems with no tools (a large and a small model), then an evaluator agent
+// decides the truth (treating AXLE's finding as authoritative) and grades every
+// system. The grades become the metrics, which are bootstrapped to 500 resamples
+// for confidence intervals.
+//
+// Needs ANTHROPIC_API_KEY; AXLE_API_KEY powers the agent's tools in the chat.
 
 import Anthropic from "@anthropic-ai/sdk";
-import { AGENT_MODEL, runEvaluator, runPlainLLM, runPopperAgent } from "../../lib/agent";
-import { computeMetrics, ItemResult } from "../../lib/benchMetrics";
-import { EVAL_SET } from "../../lib/evalset";
+import { BIG_MODEL, SMALL_MODEL, runEvaluator, runPlainModel } from "../../lib/agent";
+import { bootstrap, computeMetrics, ItemResult } from "../../lib/benchMetrics";
 
 export const runtime = "nodejs";
-export const maxDuration = 300; // many model calls + Lean; needs a Pro plan for the full set.
+export const maxDuration = 300;
 
-// Cache within a warm serverless instance so repeat loads are instant.
-let CACHE: { ranAt: number; payload: any } | null = null;
-const TTL_MS = 1000 * 60 * 30;
+const POPPER = "Popper agent";
+const OPUS = "Opus (no tools)";
+const HAIKU = "Haiku (no tools)";
 
-export async function POST() {
+type Interaction = {
+  question: string;
+  popperText: string;
+  axleUsed?: boolean;
+  axleDisproved?: boolean;
+  axleDetail?: string;
+};
+
+function axleHint(it: Interaction): string {
+  if (!it.axleUsed) return "";
+  if (it.axleDisproved) return `AXLE found a counterexample: ${it.axleDetail || "(witness returned)"}`;
+  return "AXLE ran and found no counterexample within its budget.";
+}
+
+export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json({ error: "ANTHROPIC_API_KEY is not set on the server." }, { status: 503 });
   }
-  if (CACHE && Date.now() - CACHE.ranAt < TTL_MS) {
-    return Response.json({ ...CACHE.payload, cached: true });
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return Response.json({ error: "invalid JSON body" }, { status: 400 });
+  }
+  const interactions: Interaction[] = (Array.isArray(body?.interactions) ? body.interactions : [])
+    .filter((x: any) => x && typeof x.question === "string" && x.question.trim())
+    .slice(0, 12);
+  if (interactions.length === 0) {
+    return Response.json({ error: "no interactions provided" }, { status: 400 });
   }
 
   const client = new Anthropic();
-  const haveAxle = !!process.env.AXLE_API_KEY;
+  const names = [POPPER, OPUS, HAIKU];
 
   try {
-    // Run every item in parallel; each item: agent + plain, then the evaluator.
     const perItem = await Promise.all(
-      EVAL_SET.map(async (item) => {
-        const [popper, plain] = await Promise.all([
-          runPopperAgent(item.question, client).catch((e) => emptyAnswer(e)),
-          runPlainLLM(item.question, client).catch((e) => emptyAnswer(e)),
+      interactions.map(async (it) => {
+        const [opus, haiku] = await Promise.all([
+          runPlainModel(it.question, client, BIG_MODEL).catch(() => ({ text: "(failed)", model: BIG_MODEL })),
+          runPlainModel(it.question, client, SMALL_MODEL).catch(() => ({ text: "(failed)", model: SMALL_MODEL })),
         ]);
-        const grades = await runEvaluator(item, popper, plain, client).catch(() => ({
-          popper: fallback(item.truth, popper.verdict, popper.counterexample),
-          plain: fallback(item.truth, plain.verdict, plain.counterexample),
-        }));
-        return { item, popper, plain, grades };
+        const ev = await runEvaluator(
+          it.question,
+          axleHint(it),
+          [
+            { name: POPPER, text: it.popperText || "" },
+            { name: OPUS, text: opus.text },
+            { name: HAIKU, text: haiku.text },
+          ],
+          client
+        ).catch(() => ({ truth: "NA" as const, reference_counterexample: "", grades: {} as any }));
+        return { it, ev };
       })
     );
 
-    const popperRows: ItemResult[] = perItem.map((r) => row(r.item.truth, r.popper, r.grades.popper));
-    const plainRows: ItemResult[] = perItem.map((r) => row(r.item.truth, r.plain, r.grades.plain));
+    // Only items the evaluator judged as a checkable TRUE/FALSE claim are scored.
+    const scored = perItem.filter((r) => r.ev.truth === "TRUE" || r.ev.truth === "FALSE");
+
+    const rowsFor = (name: string): ItemResult[] =>
+      scored.map((r) => {
+        const g = r.ev.grades[name] || { verdict: "UNSURE", counterexample_valid: null, quality: 1 };
+        return {
+          truth: r.ev.truth as "TRUE" | "FALSE",
+          verdict: g.verdict,
+          counterexample_valid: g.counterexample_valid,
+          quality: g.quality,
+        };
+      });
+
+    const systems = names.map((name) => {
+      const rows = rowsFor(name);
+      return { name, metrics: computeMetrics(rows), ci: bootstrap(rows, 500) };
+    });
 
     const payload = {
-      model: AGENT_MODEL,
+      model: BIG_MODEL,
+      small_model: SMALL_MODEL,
       ran_at: new Date().toISOString(),
-      axle_live: haveAxle,
-      n_items: EVAL_SET.length,
-      metrics: {
-        popper: computeMetrics(popperRows),
-        plain: computeMetrics(plainRows),
-      },
+      n_messages: interactions.length,
+      n_scored: scored.length,
+      bootstrap_samples: 500,
+      axle_decided: interactions.filter((it) => it.axleUsed && it.axleDisproved).length,
+      axle_used: interactions.filter((it) => it.axleUsed).length,
+      systems,
       items: perItem.map((r) => ({
-        id: r.item.id,
-        question: r.item.question,
-        truth: r.item.truth,
-        note: r.item.note || "",
-        reference_counterexample: r.item.counterexample || "",
-        popper: {
-          verdict: r.popper.verdict,
-          counterexample: r.popper.counterexample,
-          used_axle: r.popper.usedAxle,
-          axle_found_counterexample: r.popper.axleFoundCounterexample,
-          ...r.grades.popper,
-        },
-        plain: {
-          verdict: r.plain.verdict,
-          counterexample: r.plain.counterexample,
-          ...r.grades.plain,
-        },
+        question: r.it.question,
+        truth: r.ev.truth,
+        reference_counterexample: r.ev.reference_counterexample,
+        axle_used: !!r.it.axleUsed,
+        axle_disproved: !!r.it.axleDisproved,
+        grades: names.reduce((acc: any, name) => {
+          const g = r.ev.grades[name];
+          if (g) acc[name] = { ...g, correct: r.ev.truth !== "NA" && g.verdict === r.ev.truth };
+          return acc;
+        }, {}),
       })),
     };
-
-    CACHE = { ranAt: Date.now(), payload };
     return Response.json(payload);
   } catch (e: any) {
     return Response.json({ error: String(e?.message || e) }, { status: 500 });
   }
-}
-
-function emptyAnswer(_e: any) {
-  return { verdict: "UNSURE" as const, counterexample: "", text: "(failed)", usedAxle: false, axleFoundCounterexample: false };
-}
-
-function fallback(truth: string, verdict: string, ce: string) {
-  const correct = verdict === truth;
-  return {
-    conclusion_correct: correct,
-    counterexample_valid: truth === "FALSE" ? ce.length > 0 : null,
-    quality: correct ? 3 : 1,
-    note: "graded without evaluator",
-  };
-}
-
-function row(truth: "TRUE" | "FALSE", ans: { verdict: any }, grade: any): ItemResult {
-  return {
-    truth,
-    verdict: ans.verdict,
-    conclusion_correct: grade.conclusion_correct,
-    counterexample_valid: grade.counterexample_valid,
-    quality: grade.quality,
-  };
 }

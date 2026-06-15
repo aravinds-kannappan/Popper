@@ -3,22 +3,21 @@
 import { useState } from "react";
 import Overview from "./Overview";
 import Benchmark from "./Benchmark";
-import LiveBenchmark from "./LiveBenchmark";
+import AgentLab from "./AgentLab";
 import Dashboard from "./Dashboard";
 import Research from "./Research";
-import Chat from "./Chat";
 import { results } from "../lib/results";
 
 const TABS: [string, string][] = [
+  ["agent", "Live demo"],
   ["overview", "Overview"],
-  ["benchmark", "Benchmark"],
+  ["benchmark", "Oracle benchmark"],
   ["audits", "Audits"],
   ["research", "Research"],
-  ["agent", "Agent"],
 ];
 
 export default function Site() {
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useState("agent");
 
   return (
     <>
@@ -50,13 +49,13 @@ export default function Site() {
         {tab === "benchmark" && (
           <section className="section first">
             <h2>
-              Live agent benchmark <span className="sub">Popper agent vs a plain model, graded by an evaluator agent</span>
+              Oracle engine benchmark <span className="sub">the Monte-Carlo engine on a labelled set of bugs</span>
             </h2>
-            <LiveBenchmark />
-
-            <h2 style={{ marginTop: 40 }}>
-              Oracle engine, offline <span className="sub">the Monte-Carlo engine on a labelled set of bugs</span>
-            </h2>
+            <p className="note" style={{ marginBottom: 12 }}>
+              This is the offline, reproducible benchmark of Popper&apos;s detection engine. For the
+              live, conversation-driven benchmark against other models, use the Live demo tab and send
+              a few messages.
+            </p>
             <Benchmark />
           </section>
         )}
@@ -82,14 +81,9 @@ export default function Site() {
         {tab === "agent" && (
           <section className="section first">
             <h2>
-              Ask the Popper agent <span className="sub">Claude with live AXLE tools</span>
+              Popper in action <span className="sub">chat, then benchmark it against other models</span>
             </h2>
-            <p className="note">
-              Ask any math or coding question. For a claim it can check, the agent tries to{" "}
-              <b>break</b> it through AXLE and reports the real counterexample instead of just
-              asserting an answer. Math is typeset, so you see proper notation instead of raw LaTeX.
-            </p>
-            <Chat />
+            <AgentLab />
           </section>
         )}
 
