@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import bench from "../data/benchmark.json";
+import Charts from "./Charts";
 
 const PRETTY: Record<string, string> = {
   popper: "Popper",
@@ -28,14 +29,18 @@ export default function Benchmark() {
   const scores: Record<string, any> = data.scores;
   const [surface, setSurface] = useState<Surface>("all");
 
-  const rows: any[] = surface === "all" ? data.rows : data.rows.filter((r: any) => r.surface === surface);
+  const [unfaithfulOnly, setUnfaithfulOnly] = useState(true);
+  const CAP = 80;
+  let filtered: any[] = surface === "all" ? data.rows : data.rows.filter((r: any) => r.surface === surface);
+  if (unfaithfulOnly) filtered = filtered.filter((r: any) => r.gold !== "FAITHFUL");
+  const rows = filtered.slice(0, CAP);
 
   return (
     <div>
       <p className="note" style={{ marginBottom: 16 }}>
-        {data.n_items} labelled claims across math, code, and live Verina tasks. The task is simple:
-        flag the unfaithful specs and leave the faithful ones alone. Three judges run over the same
-        corpus. The math half needs no API key and reproduces with{" "}
+        {data.n_items} statements I labelled by hand across math, code, and live Verina tasks. The
+        task is simple: flag the broken specs and leave the good ones alone. Three checkers run over
+        the same set. The math half needs no API key and reproduces with{" "}
         <code>python examples/run_benchmark.py</code>.
       </p>
 
@@ -51,7 +56,9 @@ export default function Benchmark() {
         ))}
       </div>
 
-      <h3 className="h3">Headline</h3>
+      <Charts />
+
+      <h3 className="h3" style={{ marginTop: 28 }}>Headline</h3>
       <div className="panel" style={{ marginBottom: 8 }}>
         <table>
           <thead>
@@ -107,7 +114,17 @@ export default function Benchmark() {
             {s}
           </button>
         ))}
+        <button
+          className={`tab ${unfaithfulOnly ? "active" : ""}`}
+          onClick={() => setUnfaithfulOnly((v) => !v)}
+        >
+          unfaithful only
+        </button>
       </div>
+      <p className="note" style={{ margin: "4px 0 10px" }}>
+        Showing {rows.length} of {filtered.length} matching items. Full table in{" "}
+        <code>results/benchmark.csv</code>.
+      </p>
       <div className="panel">
         <table>
           <thead>

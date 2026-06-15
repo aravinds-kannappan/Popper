@@ -9,9 +9,9 @@ type Msg = { role: Role; content: string; toolCalls?: ToolCall[] };
 
 const EXAMPLES = [
   "Is ∀ n : Nat, n < 5 true? Check it.",
-  "Falsify: ∀ a b : Nat, a - b + b = a",
-  "Why can a fully-verified spec still be wrong?",
-  "Show me the live Verina audit results.",
+  "Try to break: ∀ a b : Nat, a - b + b = a",
+  "Why can a fully proved spec still be wrong?",
+  "Show me the live Verina results.",
 ];
 
 export default function Chat() {

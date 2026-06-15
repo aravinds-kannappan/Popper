@@ -66,9 +66,43 @@ def run_benchmark(*, with_llm: bool = False, n_trials: int = 2000, seed: int = 0
         "judges": list(results.keys()),
         "llm_run": with_llm and llm_available(),
         "scores": scores,
+        "by_family": _family_breakdown(items, by_item),
+        "by_surface": _surface_breakdown(items, by_item),
         "rows": rows,
     }
     return out
+
+
+def _flagged(res) -> bool:
+    return res.verdict.is_falsified
+
+
+def _family_breakdown(items, by_item) -> list[dict]:
+    """For each kind of bug, how many of each judge caught it."""
+    fams: dict[str, dict] = {}
+    for it in items:
+        if not it.gold_unfaithful:
+            continue
+        f = fams.setdefault(it.family, {"family": it.family, "total": 0})
+        f["total"] += 1
+        for name in by_item:
+            f.setdefault(name, 0)
+            if _flagged(by_item[name][it.name]):
+                f[name] += 1
+    return sorted(fams.values(), key=lambda d: -d["total"])
+
+
+def _surface_breakdown(items, by_item) -> list[dict]:
+    surfs: dict[str, dict] = {}
+    for it in items:
+        s = surfs.setdefault(it.surface, {"surface": it.surface, "unfaithful": 0})
+        if it.gold_unfaithful:
+            s["unfaithful"] += 1
+            for name in by_item:
+                s.setdefault(name, 0)
+                if _flagged(by_item[name][it.name]):
+                    s[name] += 1
+    return [surfs[k] for k in ("math", "code", "verina") if k in surfs]
 
 
 def _surface_counts(items) -> dict:
@@ -145,10 +179,25 @@ def _markdown(out: dict) -> str:
         "witness you can act on. Only Popper produces these.\n"
     )
 
-    lines.append("## Per-item verdicts\n")
+    lines.append("## By kind of bug\n")
+    lines.append("| bug | count | " + " | ".join(pretty.get(j, j) for j in judges) + " |")
+    lines.append("|---|---|" + "---|" * len(judges))
+    for f in out["by_family"]:
+        caught = " | ".join(f"{f.get(j, 0)}/{f['total']}" for j in judges)
+        lines.append(f"| {f['family']} | {f['total']} | {caught} |")
+
+    lines.append("\n## By surface\n")
+    lines.append("| surface | unfaithful | " + " | ".join(pretty.get(j, j) for j in judges) + " |")
+    lines.append("|---|---|" + "---|" * len(judges))
+    for sfc in out["by_surface"]:
+        caught = " | ".join(f"{sfc.get(j, 0)}/{sfc['unfaithful']}" for j in judges)
+        lines.append(f"| {sfc['surface']} | {sfc['unfaithful']} | {caught} |")
+
+    sample = [r for r in out["rows"] if r["gold"] != "FAITHFUL"][:24]
+    lines.append(f"\n## Sample of caught specs\n\n_{len(sample)} of {sum(1 for r in out['rows'] if r['gold'] != 'FAITHFUL')} unfaithful items; full table in results/benchmark.csv._\n")
     lines.append("| item | surface | gold | " + " | ".join(pretty.get(j, j) for j in judges) + " | counterexample |")
     lines.append("|---|---|---|" + "---|" * (len(judges) + 1))
-    for r in out["rows"]:
+    for r in sample:
         verdicts = " | ".join(f"`{r[f'{j}_verdict']}`" for j in judges)
         ce = r.get("popper_counterexample", "")
         ce = (ce[:70] + "...") if len(ce) > 73 else ce

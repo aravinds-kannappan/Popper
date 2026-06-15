@@ -58,7 +58,7 @@ export default function Site() {
         {tab === "audits" && (
           <section className="section first">
             <h2>
-              Audit results <span className="sub">produced by the oracle</span>
+              Audit results <span className="sub">what the checker found</span>
             </h2>
             <Dashboard data={results as any} />
           </section>
@@ -67,7 +67,7 @@ export default function Site() {
         {tab === "research" && (
           <section className="section first">
             <h2>
-              Research <span className="sub">what Popper adds to the field</span>
+              Research <span className="sub">what Popper adds, in plain English</span>
             </h2>
             <Research />
           </section>
@@ -79,9 +79,9 @@ export default function Site() {
               Ask the Popper agent <span className="sub">Claude with live AXLE tools</span>
             </h2>
             <p className="note">
-              Ask any math or coding question. For a checkable claim the agent tries to{" "}
-              <b>falsify</b> it through AXLE and reports the real counterexample instead of just
-              asserting an answer. Math is typeset, so you see proper notation rather than raw LaTeX.
+              Ask any math or coding question. For a claim it can check, the agent tries to{" "}
+              <b>break</b> it through AXLE and reports the real counterexample instead of just
+              asserting an answer. Math is typeset, so you see proper notation instead of raw LaTeX.
             </p>
             <Chat />
           </section>
@@ -89,8 +89,9 @@ export default function Site() {
 
         <div className="foot">
           Built on <a href="https://axle.axiommath.ai">AXLE</a> and{" "}
-          <a href="https://github.com/sunblaze-ucb/verina">Verina</a>. Popper falsifies; it does not
-          certify. A FAITHFUL verdict means no counterexample was found within the search budget.
+          <a href="https://github.com/sunblaze-ucb/verina">Verina</a>. Popper breaks statements; it
+          does not certify them. A FAITHFUL verdict means no counterexample was found within the
+          budget, not that none exists.
         </div>
       </main>
     </>

@@ -104,6 +104,13 @@ td.mono, .mono { font-family: var(--mono); }
 .note { color: var(--muted); font-size: 13px; }
 .foot { margin-top: 48px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
 
+/* charts */
+.chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-bottom: 14px; }
+.chart { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.chart.wide { margin-top: 0; }
+.chart-title { font-size: 14px; font-weight: 700; }
+.chart-sub { color: var(--muted); font-size: 12px; margin: 2px 0 8px; }
+
 /* rendered markdown (agent replies + research) */
 .md { line-height: 1.6; }
 .md > :first-child { margin-top: 0; }

@@ -3,113 +3,110 @@
 // reports/research.md in the repository.
 
 export const research = String.raw`
-# Falsifying the specification
+# Checking the statement, not just the proof
 
-**An executable oracle for spec faithfulness, and a benchmark that measures it.**
+**What Popper adds, in plain English, with a benchmark that measures it.**
 
-## The gap
+## The short version
 
-Formal verification gives you a proof that some code or some math matches a
-written statement. It says nothing about whether that statement is the one you
-meant. A specification can be too weak, so it accepts wrong answers. It can be
-too strong, so it rejects right ones. It can be vacuous, so it accepts
-everything. In all three cases the proof checker is satisfied and the pipeline is
-green, and the result is still wrong.
+When you verify code or math with a computer, you write down a statement of what
+is supposed to be true (people call this a "specification", or "spec") and then
+prove your work matches it. The weak spot is the statement itself. It can be too
+loose and accept wrong answers, too tight and reject right ones, or empty and
+accept anything. In all three cases the proof passes and the result is still
+wrong.
 
-The proving step has moved fast. Provers now clear competition mathematics and
-discharge most of the proof obligations in code verification benchmarks. The
-specifying step has not kept pace. On the Verina benchmark the best general model
-writes code that is correct about 73% of the time but writes specifications that
-are sound and complete only about 52% of the time. The specification, not the
-proof, is the weak link, and the checker cannot see it: it validates a proof
-against a specification, so a wrong specification just yields a valid proof of the
-wrong thing.
+I built Popper to attack that weak spot. Popper is an "oracle", which here just
+means a separate checker you can ask one question: can I break this statement? It
+tries hard to find an input that makes the statement fail, and when it finds one
+it gives you that input, which I call a counterexample. On a benchmark of 334
+statements I labelled by hand, Popper flags every one of the 168 broken ones with
+a counterexample and raises no false alarms on the 163 good ones. A proof checker
+on its own flags none, because flagging a bad statement is not something a proof
+checker can do.
 
-## Three rungs of trust
+## Why the proof checker misses this
 
-1. A model writes a proof. You get a fluent artifact and no ground truth.
-2. A model plus Lean or AXLE. You get a real proof that matches the statement,
-   and you are still blind to whether the statement is faithful. A vacuous
-   statement such as $\forall x,\ \top$ proves instantly. "Sorted" written as
-   "same length" is satisfied by the identity function.
-3. A model plus Lean plus Popper. The proof matches the statement, and an
-   independent oracle has either failed to break the statement or has broken it
-   and handed you the counterexample.
+The proving side is strong now. The specifying side is not. On Verina, a benchmark
+of code paired with specs, the best general model writes correct code about 73% of
+the time but writes specs that are both sound and complete only about 52% of the
+time. "Sound" means the spec does not reject a correct answer; "complete" means it
+does not accept a wrong one.
 
-Formal provers live on rung two. Rung three is the open problem, and it is where
-Popper operates.
+A proof checker cannot help here, and the reason is structural. It takes a
+statement and a proof and confirms the proof matches the statement. It never asks
+whether the statement matches what you meant. So a wrong statement just yields a
+valid proof of the wrong thing.
 
-## Method
+## Three levels of trust
 
-Popper exposes one interface, a falsification oracle, with two engines behind it.
+1. A model writes a proof in words. It reads well and guarantees nothing.
+2. A model plus a prover (Lean or AXLE). You get a real proof that matches the
+   statement, and you are still trusting the statement. A statement that says
+   nothing, like $\forall x,\ \text{true}$, proves instantly. "Sorted" defined as
+   "same length" is satisfied by code that does nothing.
+3. A model plus a prover plus Popper. The proof matches the statement, and an
+   independent oracle has tried to break the statement and either failed or handed
+   you the input that breaks it.
 
-**Math.** Every inequality or identity has a numerical shadow. A statement
-carries a hypothesis $H$ and a conclusion $C$, and the oracle tests $H \Rightarrow
-C$ over thousands of sampled instances. A dropped hypothesis or a flipped
-direction breaks on some draw, and that draw is the counterexample. For example,
-Gibbs' inequality $\mathrm{KL}(p \| q) \ge 0$ holds for distributions, but the
-moment you forget $\sum_i q_i = 1$ it fails, and the oracle finds a $q$ that drives
-$\sum_i p_i \log \frac{p_i}{q_i}$ below zero. The data processing inequality
-$X \to Y \to Z \Rightarrow I(X;Z) \le I(X;Y)$ fails without the Markov
-hypothesis, and the oracle exhibits a joint where $Z$ leaks $X$ directly. This
-engine runs locally with no prover and no API key.
+Provers live on level two. Level three is where Popper works.
 
-**Code.** Each Verina task ships a postcondition, a correct output, and several
-wrong outputs. Popper asks AXLE to evaluate the postcondition on those witnesses
-through $\texttt{native\_decide}$. A rejected correct output means the spec is too
-strong. An accepted wrong output means it is too weak. An accepted garbage output
-means it is vacuous.
+## How it works
 
-A counterexample is more than a failing test. It is a repair signal, and the same
-signal is a clean reward for an automated loop. Popper's repair stage feeds the
-counterexample back into the statement and re-audits until the spec is faithful or
-the budget runs out.
+**Math.** Most inequalities can be checked with numbers. A statement has an
+assumption and a conclusion, and the engine draws thousands of random cases and
+checks that the conclusion holds whenever the assumption does. This is a
+Monte-Carlo check, which is just "try many random inputs and watch for a break".
+For example, Gibbs' inequality says the KL divergence (a standard way to measure
+how different two probability distributions are) is never negative:
+$$\mathrm{KL}(p \| q) = \sum_i p_i \log \frac{p_i}{q_i} \ge 0.$$
+It holds when $q$ is a real distribution, but the moment you forget the assumption
+$\sum_i q_i = 1$, it fails, and the engine finds a $q$ that drives the sum below
+zero. The same thing happens with the data processing inequality
+$X \to Y \to Z \Rightarrow I(X;Z) \le I(X;Y)$: drop the Markov assumption and the
+engine exhibits a case where $Z$ copies $X$ directly. This engine needs no prover
+and no API key.
 
-## Benchmark
+**Code.** Each Verina task ships a correct answer and several wrong ones. Popper
+asks AXLE to evaluate the spec on each. A rejected correct answer means the spec is
+too tight. An accepted wrong answer means it is too loose. An accepted nonsense
+answer means it is empty.
 
-We labelled 38 formal claims ahead of time as faithful or unfaithful, recorded the
-kind of bug, and ran three judges over the same corpus.
+The counterexample is what makes this practical. A pass/fail bit tells you a spec
+is probably wrong. A counterexample tells you which input breaks it, which is what
+you need to fix it. The same input also works as a clean training signal for an
+automated loop, with no human in the loop. Popper's repair loop uses it to adjust
+the statement and check again until it holds up.
 
-- **Math, 24 items.** Eleven faithful inequalities (Gibbs, data processing,
-  entropy concavity, Cauchy-Schwarz, AM-GM, the triangle inequality, entropy
-  subadditivity, non-negativity of mutual information, the cross entropy bound,
-  Jensen for the logarithm, non-negativity of variance), eleven unfaithful twins,
-  and two vacuity traps.
-- **Code, 4 items.** The offline code-spec fixtures.
-- **Verina, 10 items.** Real tasks audited live over AXLE, all faithful, which
-  measures the false positive rate.
+## The benchmark
 
-The judges are the proof checker, which accepts anything that type checks; an LLM
-judge, which reads the statement and guesses with no execution; and Popper.
+I labelled 334 statements as faithful or unfaithful, recorded the kind of bug for
+the broken ones, and ran three checkers over the same set: the proof checker
+(accepts anything valid as a proof), an LLM judge (a model reads the statement and
+guesses, with no execution), and Popper.
 
-| judge | unfaithful caught | false positives | counterexample yield | F1 |
+| checker | unfaithful caught | false alarms | counterexample | F1 |
 |---|---|---|---|---|
-| Popper | 14/14 (100%) | 0/22 (0%) | 100% | 1.00 |
-| Proof checker | 0/14 (0%) | 0/22 (0%) | 0% | 0.00 |
-| LLM judge | live | live | 0% (no witness) | live |
+| Popper | 168/168 (100%) | 0/163 (0%) | every time | 1.00 |
+| Proof checker | 0/168 (0%) | 0/163 (0%) | never | 0.00 |
+| LLM judge | runnable live | runnable live | never | runnable live |
 
-The proof checker scores zero recall no matter how strong the prover is, because
-flagging an unfaithful spec is outside what it does. The LLM judge can guess, but
-it never returns an executable witness. The full numbers and the per-item table
-are on the Benchmark tab.
+The proof checker scores zero no matter how strong the prover behind it is. The
+LLM judge can guess, but it never returns the input that breaks the spec. The full
+numbers, the charts, and the per-item table are on the Benchmark tab.
 
 ## What Popper adds
 
-1. An oracle for the specification, not the proof. Everything else checks the
-   proof against the spec; Popper checks the spec against intent.
-2. A counterexample, not a score. A number says a spec is probably wrong. A
-   counterexample says which input breaks it, which is what you fix.
-3. A clean training signal. The counterexample that repairs a spec is a reward an
-   automated loop can optimize against, with no human and no GPU reward model.
-4. Honest abstention. When a spec is not decidable on a witness, Popper reports
-   INCONCLUSIVE rather than guessing.
+1. A checker for the statement, not the proof.
+2. A counterexample, not a score. It says which input breaks the spec.
+3. A clean training signal: the counterexample that fixes a spec is also a reward.
+4. Honest "I don't know" when a spec cannot be decided on a case, instead of a guess.
 
-## Limitations
+## Limits
 
-Popper falsifies; it does not certify. A FAITHFUL verdict means no counterexample
-was found within the search budget, not a proof of faithfulness, which is
-undecidable in general. Monte-Carlo search can miss a bug that hides on a measure
-zero set, though dropped hypotheses and flipped directions are exactly the
-failures that surface under sampling. Lean and AXLE remain the ground truth for
-the proof itself.
+Popper breaks statements; it does not certify them. A FAITHFUL verdict means no
+counterexample was found within the budget, not that none exists. Random sampling
+can miss a bug that hides on a tiny set of inputs, though dropped assumptions and
+flipped directions are exactly the bugs that show up under sampling. Lean and AXLE
+stay the final word on the proof itself.
 `;

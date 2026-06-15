@@ -1,12 +1,12 @@
 {
   "title": "Spec-faithfulness benchmark: Popper vs proof checker vs LLM judge",
-  "n_items": 38,
+  "n_items": 334,
   "surfaces": {
     "math": {
-      "total": 24,
-      "faithful": 11,
-      "unfaithful": 11,
-      "vacuity": 2
+      "total": 320,
+      "faithful": 152,
+      "unfaithful": 165,
+      "vacuity": 3
     },
     "code": {
       "total": 4,
@@ -29,29 +29,29 @@
   "scores": {
     "popper": {
       "judge": "popper",
-      "n": 38,
-      "n_unfaithful": 14,
-      "n_faithful": 22,
-      "n_vacuity": 2,
-      "true_positives": 14,
+      "n": 334,
+      "n_unfaithful": 168,
+      "n_faithful": 163,
+      "n_vacuity": 3,
+      "true_positives": 168,
       "false_positives": 0,
       "false_negatives": 0,
       "recall_unfaithful": 1.0,
       "precision": 1.0,
       "f1": 1.0,
       "false_positive_rate": 0.0,
-      "vacuity_handled": 2,
+      "vacuity_handled": 3,
       "counterexample_yield": 1.0
     },
     "proof_checker": {
       "judge": "proof_checker",
-      "n": 38,
-      "n_unfaithful": 14,
-      "n_faithful": 22,
-      "n_vacuity": 2,
+      "n": 334,
+      "n_unfaithful": 168,
+      "n_faithful": 163,
+      "n_vacuity": 3,
       "true_positives": 0,
       "false_positives": 0,
-      "false_negatives": 14,
+      "false_negatives": 168,
       "recall_unfaithful": 0.0,
       "precision": 0.0,
       "f1": 0.0,
@@ -60,9 +60,65 @@
       "counterexample_yield": 0.0
     }
   },
+  "by_family": [
+    {
+      "family": "direction-error",
+      "total": 122,
+      "popper": 122,
+      "proof_checker": 0
+    },
+    {
+      "family": "over-claim",
+      "total": 26,
+      "popper": 26,
+      "proof_checker": 0
+    },
+    {
+      "family": "dropped-hypothesis",
+      "total": 17,
+      "popper": 17,
+      "proof_checker": 0
+    },
+    {
+      "family": "vacuous",
+      "total": 1,
+      "popper": 1,
+      "proof_checker": 0
+    },
+    {
+      "family": "incomplete",
+      "total": 1,
+      "popper": 1,
+      "proof_checker": 0
+    },
+    {
+      "family": "unsound",
+      "total": 1,
+      "popper": 1,
+      "proof_checker": 0
+    }
+  ],
+  "by_surface": [
+    {
+      "surface": "math",
+      "unfaithful": 165,
+      "popper": 165,
+      "proof_checker": 0
+    },
+    {
+      "surface": "code",
+      "unfaithful": 3,
+      "popper": 3,
+      "proof_checker": 0
+    },
+    {
+      "surface": "verina",
+      "unfaithful": 0
+    }
+  ],
   "rows": [
     {
-      "name": "kl_nonneg",
+      "name": "kl_nonneg_k2",
       "surface": "math",
       "family": "faithful",
       "gold": "FAITHFUL",
@@ -72,57 +128,3167 @@
       "proof_checker_counterexample": ""
     },
     {
-      "name": "kl_nonneg_DROPPED_normalization",
+      "name": "kl_DROPPED_norm_k2",
       "surface": "math",
       "family": "dropped-hypothesis",
       "gold": "FALSIFIED",
       "popper_verdict": "FALSIFIED",
-      "popper_counterexample": "q=[0.777, 1.534, 1.215] (Σq=3.525≠1) ⇒ Σ pᵢ·log(pᵢ/qᵢ) = -1.1543 < 0",
+      "popper_counterexample": "sum q=2.04!=1 => KL=-0.695 < 0",
       "proof_checker_verdict": "FAITHFUL",
       "proof_checker_counterexample": ""
     },
     {
-      "name": "data_processing",
-      "surface": "math",
-      "family": "faithful",
-      "gold": "FAITHFUL",
-      "popper_verdict": "FAITHFUL",
-      "popper_counterexample": "",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "data_processing_DROPPED_markov",
-      "surface": "math",
-      "family": "dropped-hypothesis",
-      "gold": "FALSIFIED",
-      "popper_verdict": "FALSIFIED",
-      "popper_counterexample": "I(X;Z) = 0.8318 > I(X;Y) = 0.0478  (Z leaks X directly)",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "entropy_concave",
-      "surface": "math",
-      "family": "faithful",
-      "gold": "FAITHFUL",
-      "popper_verdict": "FAITHFUL",
-      "popper_counterexample": "",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "entropy_concave_WRONG_direction",
+      "name": "kl_FLIPPED_k2",
       "surface": "math",
       "family": "direction-error",
       "gold": "FALSIFIED",
       "popper_verdict": "FALSIFIED",
-      "popper_counterexample": "H(λp+(1-λ)q) = 1.0797 > λH(p)+(1-λ)H(q) = 1.0600  (entropy is concave, not convex)",
+      "popper_counterexample": "KL=0.018 > 0",
       "proof_checker_verdict": "FAITHFUL",
       "proof_checker_counterexample": ""
     },
     {
-      "name": "entropy_uniform_vacuous_guard",
+      "name": "kl_nonneg_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k3",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=3.53!=1 => KL=-1.154 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k3",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.106 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k4",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=6.01!=1 => KL=-1.662 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k4",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.131 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k5",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=7.66!=1 => KL=-1.944 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k5",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.091 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k6",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=10.68!=1 => KL=-2.226 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k6",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.142 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k7",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=11.44!=1 => KL=-2.245 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k7",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.192 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_k8",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k8",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=13.14!=1 => KL=-2.442 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k8",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.134 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_k9",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k9",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=17.39!=1 => KL=-2.676 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k9",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.180 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_k10",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k10",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=20.77!=1 => KL=-2.914 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k10",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.119 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_k11",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k11",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=21.17!=1 => KL=-2.846 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k11",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.207 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_k12",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k12",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=24.40!=1 => KL=-3.054 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k12",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.140 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_k13",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k13",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=25.28!=1 => KL=-3.116 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k13",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.113 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_nonneg_k14",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_DROPPED_norm_k14",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "sum q=26.14!=1 => KL=-2.975 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "kl_FLIPPED_k14",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "KL=0.289 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k2",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=0.683 > rhs=0.678",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k3",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=1.080 > rhs=1.060",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k4",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=1.343 > rhs=1.309",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k5",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=1.549 > rhs=1.537",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k6",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=1.758 > rhs=1.729",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k7",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=1.921 > rhs=1.874",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k8",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k8",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=2.020 > rhs=2.000",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k9",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k9",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=2.151 > rhs=2.121",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k10",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k10",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=2.257 > rhs=2.229",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k11",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k11",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=2.352 > rhs=2.323",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k12",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k12",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=2.444 > rhs=2.412",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k13",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k13",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=2.500 > rhs=2.472",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_concave_k14",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_convex_WRONG_k14",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(mix)=2.597 > rhs=2.561",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k2",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.128 < |a|^2|b|^2=0.191",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k3",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.084 < |a|^2|b|^2=0.206",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k4",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.000 < |a|^2|b|^2=0.513",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k5",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.063 < |a|^2|b|^2=0.542",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k6",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.017 < |a|^2|b|^2=1.214",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k7",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.117 < |a|^2|b|^2=1.769",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k8",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k8",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.020 < |a|^2|b|^2=2.198",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k9",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k9",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.004 < |a|^2|b|^2=4.626",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k10",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k10",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.463 < |a|^2|b|^2=6.259",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k11",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k11",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.000 < |a|^2|b|^2=8.277",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k12",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k12",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=0.618 < |a|^2|b|^2=9.982",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k13",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k13",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=2.040 < |a|^2|b|^2=11.923",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_k14",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cauchy_schwarz_FLIPPED_k14",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "(a.b)^2=1.174 < |a|^2|b|^2=12.704",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k2",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=2.404 > GM=2.400",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k3",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=2.023 > GM=1.937",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k4",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=1.712 > GM=1.542",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k5",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=1.676 > GM=1.540",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k6",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=1.600 > GM=1.481",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k7",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=1.707 > GM=1.582",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k8",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k8",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=1.607 > GM=1.476",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k9",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k9",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=1.588 > GM=1.471",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k10",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k10",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=1.604 > GM=1.497",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k11",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k11",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=1.706 > GM=1.581",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k12",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k12",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=1.690 > GM=1.575",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k13",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k13",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=1.625 > GM=1.502",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_k14",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "am_gm_FLIPPED_k14",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "AM=1.671 > GM=1.547",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k2",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=2.655 < |x|+|y|=6.841",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k3",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=3.371 < |x|+|y|=6.970",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k4",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=6.217 < |x|+|y|=8.579",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k5",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=7.147 < |x|+|y|=8.682",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k6",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=7.861 < |x|+|y|=10.503",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k7",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=7.031 < |x|+|y|=11.533",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k8",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k8",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=9.016 < |x|+|y|=12.176",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k9",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k9",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=10.829 < |x|+|y|=14.892",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k10",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k10",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=13.193 < |x|+|y|=16.283",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k11",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k11",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=12.197 < |x|+|y|=17.110",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k12",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k12",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=14.405 < |x|+|y|=18.060",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k13",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k13",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=15.989 < |x|+|y|=18.891",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_k14",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "triangle_FLIPPED_k14",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "|x+y|=11.477 < |x|+|y|=19.082",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k2",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=4.012 > AM=4.006",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k3",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=3.494 > AM=3.372",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k4",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=3.094 > AM=2.853",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k5",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=2.994 > AM=2.794",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k6",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=2.856 > AM=2.666",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k7",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=3.031 > AM=2.845",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k8",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k8",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=2.885 > AM=2.679",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k9",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k9",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=2.834 > AM=2.646",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k10",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k10",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=2.842 > AM=2.673",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k11",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k11",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=3.036 > AM=2.843",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k12",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k12",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=2.997 > AM=2.816",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k13",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k13",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=2.906 > AM=2.708",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_k14",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "qm_am_FLIPPED_k14",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "QM=2.977 > AM=2.785",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k2",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=1.388 > mean(log)=1.386",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k3",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=1.215 > mean(log)=1.172",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k4",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=1.048 > mean(log)=0.944",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k5",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=1.027 > mean(log)=0.943",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k6",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=0.980 > mean(log)=0.903",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k7",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=1.045 > mean(log)=0.969",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k8",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k8",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=0.985 > mean(log)=0.900",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k9",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k9",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=0.973 > mean(log)=0.897",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k10",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k10",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=0.983 > mean(log)=0.914",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k11",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k11",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=1.045 > mean(log)=0.969",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k12",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k12",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=1.035 > mean(log)=0.965",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k13",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k13",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=0.996 > mean(log)=0.917",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_k14",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "jensen_log_FLIPPED_k14",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "log(mean)=1.024 > mean(log)=0.947",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k2",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-1.603 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k3",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-1.083 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k4",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-0.234 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k5",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-1.137 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k6",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-0.049 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k7",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-0.542 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k8",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k8",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-0.549 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k9",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k9",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-0.015 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k10",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k10",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-0.233 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k11",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k11",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-0.164 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k12",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k12",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-0.092 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k13",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k13",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-0.278 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "variance_nonneg_k14",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mean_nonneg_WRONG_k14",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "mean=-0.161 < 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k2",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=0.709 > H(p)=0.692",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k3",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=1.165 > H(p)=1.059",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k4",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=1.424 > H(p)=1.293",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k5",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=1.623 > H(p)=1.532",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k6",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=1.860 > H(p)=1.718",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k7",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=2.068 > H(p)=1.876",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k8",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k8",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=2.132 > H(p)=1.999",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k9",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k9",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=2.304 > H(p)=2.124",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k10",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k10",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=2.356 > H(p)=2.237",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k11",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k11",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=2.533 > H(p)=2.326",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k12",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k12",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=2.558 > H(p)=2.418",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k13",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k13",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=2.603 > H(p)=2.489",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_k14",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cross_entropy_ge_FLIPPED_k14",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p,q)=2.855 > H(p)=2.566",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k2",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=0.692 < log k=0.693",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k3",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=1.059 < log k=1.099",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k4",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=1.293 < log k=1.386",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k5",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=1.532 < log k=1.609",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k6",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=1.718 < log k=1.792",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k7",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=1.876 < log k=1.946",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k8",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k8",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=1.999 < log k=2.079",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k9",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k9",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=2.124 < log k=2.197",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k10",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k10",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=2.237 < log k=2.303",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k11",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k11",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=2.326 < log k=2.398",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k12",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k12",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=2.418 < log k=2.485",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k13",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k13",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=2.489 < log k=2.565",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_upper_k14",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_lower_WRONG_k14",
+      "surface": "math",
+      "family": "over-claim",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(p)=2.566 < log k=2.639",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_FLIPPED_k2",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X,Y)=1.293 < H(X)+H(Y)=1.296",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_FLIPPED_k3",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X,Y)=2.124 < H(X)+H(Y)=2.162",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_FLIPPED_k4",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X,Y)=2.695 < H(X)+H(Y)=2.734",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_FLIPPED_k5",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X,Y)=3.143 < H(X)+H(Y)=3.203",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_FLIPPED_k6",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X,Y)=3.469 < H(X)+H(Y)=3.560",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "entropy_subadditive_FLIPPED_k7",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X,Y)=3.757 < H(X)+H(Y)=3.867",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonneg_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonpos_WRONG_k2",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Y)=0.004 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonneg_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonpos_WRONG_k3",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Y)=0.038 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonneg_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonpos_WRONG_k4",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Y)=0.039 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonneg_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonpos_WRONG_k5",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Y)=0.061 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonneg_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonpos_WRONG_k6",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Y)=0.090 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonneg_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "mutual_info_nonpos_WRONG_k7",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Y)=0.109 > 0",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_reduces_entropy_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_increases_entropy_WRONG_k2",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X|Y)=0.605 < H(X)=0.609",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_reduces_entropy_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_increases_entropy_WRONG_k3",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X|Y)=1.037 < H(X)=1.075",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_reduces_entropy_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_increases_entropy_WRONG_k4",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X|Y)=1.342 < H(X)=1.381",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_reduces_entropy_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_increases_entropy_WRONG_k5",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X|Y)=1.539 < H(X)=1.600",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_reduces_entropy_k6",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_increases_entropy_WRONG_k6",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X|Y)=1.694 < H(X)=1.784",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_reduces_entropy_k7",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "cond_increases_entropy_WRONG_k7",
+      "surface": "math",
+      "family": "direction-error",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "H(X|Y)=1.825 < H(X)=1.934",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "dpi_k2",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "dpi_DROPPED_markov_k2",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Z)=0.493 > I(X;Y)=0.002",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "dpi_k3",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "dpi_DROPPED_markov_k3",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Z)=0.832 > I(X;Y)=0.048",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "dpi_k4",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "dpi_DROPPED_markov_k4",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Z)=1.052 > I(X;Y)=0.021",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "dpi_k5",
+      "surface": "math",
+      "family": "faithful",
+      "gold": "FAITHFUL",
+      "popper_verdict": "FAITHFUL",
+      "popper_counterexample": "",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "dpi_DROPPED_markov_k5",
+      "surface": "math",
+      "family": "dropped-hypothesis",
+      "gold": "FALSIFIED",
+      "popper_verdict": "FALSIFIED",
+      "popper_counterexample": "I(X;Z)=1.274 > I(X;Y)=0.065",
+      "proof_checker_verdict": "FAITHFUL",
+      "proof_checker_counterexample": ""
+    },
+    {
+      "name": "self_successor_vacuous_k2",
       "surface": "math",
       "family": "vacuity",
       "gold": "INCONCLUSIVE",
@@ -132,167 +3298,17 @@
       "proof_checker_counterexample": ""
     },
     {
-      "name": "cauchy_schwarz",
+      "name": "self_successor_vacuous_k5",
       "surface": "math",
-      "family": "faithful",
-      "gold": "FAITHFUL",
-      "popper_verdict": "FAITHFUL",
+      "family": "vacuity",
+      "gold": "INCONCLUSIVE",
+      "popper_verdict": "INCONCLUSIVE",
       "popper_counterexample": "",
       "proof_checker_verdict": "FAITHFUL",
       "proof_checker_counterexample": ""
     },
     {
-      "name": "cauchy_schwarz_FLIPPED",
-      "surface": "math",
-      "family": "direction-error",
-      "gold": "FALSIFIED",
-      "popper_verdict": "FALSIFIED",
-      "popper_counterexample": "(a.b)^2=0.0843 < |a|^2|b|^2=0.2061",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "am_gm",
-      "surface": "math",
-      "family": "faithful",
-      "gold": "FAITHFUL",
-      "popper_verdict": "FAITHFUL",
-      "popper_counterexample": "",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "am_gm_FLIPPED",
-      "surface": "math",
-      "family": "direction-error",
-      "gold": "FALSIFIED",
-      "popper_verdict": "FALSIFIED",
-      "popper_counterexample": "AM=2.0233 > GM=1.9374",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "triangle_ineq",
-      "surface": "math",
-      "family": "faithful",
-      "gold": "FAITHFUL",
-      "popper_verdict": "FAITHFUL",
-      "popper_counterexample": "",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "triangle_ineq_FLIPPED",
-      "surface": "math",
-      "family": "direction-error",
-      "gold": "FALSIFIED",
-      "popper_verdict": "FALSIFIED",
-      "popper_counterexample": "x=0.113, y=-0.951: |x+y|=0.838 < |x|+|y|=1.063",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "entropy_subadditive",
-      "surface": "math",
-      "family": "faithful",
-      "gold": "FAITHFUL",
-      "popper_verdict": "FAITHFUL",
-      "popper_counterexample": "",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "entropy_subadditive_FLIPPED",
-      "surface": "math",
-      "family": "direction-error",
-      "gold": "FALSIFIED",
-      "popper_verdict": "FALSIFIED",
-      "popper_counterexample": "H(X,Y)=2.1239 < H(X)+H(Y)=2.1619",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "mutual_info_nonneg",
-      "surface": "math",
-      "family": "faithful",
-      "gold": "FAITHFUL",
-      "popper_verdict": "FAITHFUL",
-      "popper_counterexample": "",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "mutual_info_nonpos_WRONG",
-      "surface": "math",
-      "family": "direction-error",
-      "gold": "FALSIFIED",
-      "popper_verdict": "FALSIFIED",
-      "popper_counterexample": "I(X;Y)=0.0381 > 0",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "cross_entropy_ge_entropy",
-      "surface": "math",
-      "family": "faithful",
-      "gold": "FAITHFUL",
-      "popper_verdict": "FAITHFUL",
-      "popper_counterexample": "",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "cross_entropy_ge_entropy_FLIPPED",
-      "surface": "math",
-      "family": "direction-error",
-      "gold": "FALSIFIED",
-      "popper_verdict": "FALSIFIED",
-      "popper_counterexample": "H(p,q)=1.1647 > H(p)=1.0590",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "jensen_log_concave",
-      "surface": "math",
-      "family": "faithful",
-      "gold": "FAITHFUL",
-      "popper_verdict": "FAITHFUL",
-      "popper_counterexample": "",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "jensen_log_concave_FLIPPED",
-      "surface": "math",
-      "family": "direction-error",
-      "gold": "FALSIFIED",
-      "popper_verdict": "FALSIFIED",
-      "popper_counterexample": "log(mean)=1.2155 > mean(log)=1.1721",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "variance_nonneg",
-      "surface": "math",
-      "family": "faithful",
-      "gold": "FAITHFUL",
-      "popper_verdict": "FAITHFUL",
-      "popper_counterexample": "",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "variance_mean_nonneg_WRONG",
-      "surface": "math",
-      "family": "over-claim",
-      "gold": "FALSIFIED",
-      "popper_verdict": "FALSIFIED",
-      "popper_counterexample": "mean=-1.0829 < 0 for x=[-2.41, 0.11, -0.95]",
-      "proof_checker_verdict": "FAITHFUL",
-      "proof_checker_counterexample": ""
-    },
-    {
-      "name": "self_successor_vacuous",
+      "name": "self_successor_vacuous_k9",
       "surface": "math",
       "family": "vacuity",
       "gold": "INCONCLUSIVE",

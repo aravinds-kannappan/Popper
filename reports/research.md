@@ -1,171 +1,151 @@
-# Falsifying the specification: an executable oracle for spec faithfulness
+# Checking the statement, not just the proof
 
-A short research report on what Popper adds, and a benchmark that measures it.
+A short report on what Popper adds, written in plain English, with a benchmark
+that measures it.
 
-## Summary
+## The short version
 
-Formal verification gives you a proof that some code or some math matches a
-written statement. It says nothing about whether that statement is the one you
-meant. A specification can be too weak (it accepts wrong answers), too strong (it
-rejects right ones), or vacuous (it accepts everything). In all three cases the
-proof checker is happy and the pipeline is green, and the result is still wrong.
+When you verify code or math with a computer, you write a statement of what is
+supposed to be true (people call this a "specification", or "spec" for short) and
+then prove your work matches it. The weak spot is the statement itself. It can be
+too loose and accept wrong answers, too tight and reject right ones, or empty and
+accept anything. In all three cases the proof still passes and the result is still
+wrong.
 
-Popper is an executable oracle that goes after that gap. Instead of trying to
-prove a statement, it tries to break it, and when it succeeds it returns a
-concrete counterexample. On a 38 item benchmark spanning math statements, code
-specs, and real Verina tasks, Popper flags every one of the 14 unfaithful specs
-with a counterexample and raises zero false alarms on the 22 faithful ones. A
-proof checker alone flags none of them, because flagging them is not something a
-proof checker can do.
+I built Popper to attack that weak spot. Popper is an "oracle", which here just
+means a separate checker you can ask a yes-or-no question. The question is: can I
+break this statement? Popper tries hard to find an input that makes the statement
+fail, and when it finds one it gives you that input, which I call a
+counterexample. On a benchmark of 334 statements I labelled by hand, Popper flags
+every one of the 168 broken ones with a counterexample and raises no false alarms
+on the 163 good ones. A proof checker on its own flags none of them, because
+flagging a bad statement is not something a proof checker can do.
 
-## 1. The problem
+## 1. The problem, and why the proof checker misses it
 
-The trustworthy side of verified AI has moved fast on the proving step. Provers
-now clear competition level mathematics and solve most of the proof obligations
-in code verification benchmarks. The specification step has not moved with it. On
-the Verina benchmark the best general model writes code that is correct about 73%
-of the time but writes specifications that are sound and complete only about 52%
-of the time. The specification, not the proof, is the weak link.
+The proving side has gotten very strong. Modern provers clear hard competition
+math and discharge most of the proof goals in code-verification benchmarks. The
+specifying side has not kept up. On Verina, a benchmark of code paired with specs,
+the best general model writes correct code about 73% of the time but writes specs
+that are both sound and complete only about 52% of the time. ("Sound" means the
+spec does not reject a correct answer. "Complete" means it does not accept a wrong
+one.)
 
-This matters because the proof checker cannot see the weakness. A checker
-validates a proof against a specification. If the specification is wrong, the
-checker validates a proof of the wrong thing and reports success. Worse, when the
-same model writes both the specification and the code, it tends to write a
-specification that its own code already satisfies, bugs included. The failure is
-silent, and silence is exactly what you do not want from a verification tool.
+The reason a proof checker cannot help here is structural. A checker takes a
+statement and a proof and confirms the proof matches the statement. It never
+looks at whether the statement matches what you meant. So a wrong statement just
+yields a valid proof of the wrong thing, and the checker reports success. Worse,
+when one model writes both the spec and the code, it tends to write a spec its own
+code already satisfies, bugs included. The failure is silent, and silence is the
+last thing you want from a verification tool.
 
-## 2. Where Popper sits
+## 2. Where Popper sits next to the usual tools
 
-Think of three rungs of trust.
+Three levels of trust, and what each one still misses.
 
-1. A model writes or explains a proof. You get a fluent artifact and no ground
-   truth. Unjustified steps and missing cases are invisible without an expert
-   reader.
-2. A model plus Lean or AXLE. You get a real proof that matches the statement.
-   You are still blind to whether the statement is faithful. A vacuous statement
-   proves instantly. "Sorted" written as "same length" is satisfied by the
-   identity function, and the checker will not complain.
-3. A model plus Lean plus Popper. The proof matches the statement, and an
-   independent oracle has tried and failed to break the statement, or has broken
-   it and handed you the counterexample.
+1. A model writes a proof in words. It reads well and guarantees nothing. A
+   skipped case is invisible without an expert reader.
+2. A model plus a prover (Lean or AXLE). You get a real proof that matches the
+   statement, and you are still trusting the statement. A statement that says
+   nothing proves instantly. "Sorted" defined as "same length" is satisfied by
+   code that does nothing.
+3. A model plus a prover plus Popper. The proof matches the statement, and an
+   independent oracle has tried to break the statement. If it could not, that is
+   evidence the spec is fine. If it could, you get the input that breaks it.
 
-Rung two is where formal provers live today. Rung three is the open problem, and
-it is where Popper operates.
+Provers live on level two. Level three is the open part, and that is where Popper
+works.
 
-## 3. Method
+## 3. How Popper works
 
-Popper has one interface and two engines. The interface is a falsification
-oracle: given a formal claim, return a verdict and, on failure, a counterexample.
-The verdicts are FAITHFUL (no counterexample found within budget), FALSIFIED,
-UNSOUND, INCOMPLETE, VACUOUS, and INCONCLUSIVE (not enough signal, reported
-honestly rather than guessed).
+One interface, two engines.
 
-**Math.** Every inequality or identity in analysis and information theory has a
-numerical shadow. A statement carries a hypothesis H and a conclusion C, and the
-oracle tests H implies C over thousands of sampled instances. A dropped
-hypothesis, a flipped inequality, or an over-strong claim breaks on some draw, and
-the violating draw is the counterexample. This engine runs locally with no prover
-and no API key.
+**Math.** Most inequalities can be checked with numbers. A statement has an
+assumption and a conclusion, and the engine draws thousands of random cases and
+checks that the conclusion holds whenever the assumption does. This is a
+Monte-Carlo check, which is just "try many random inputs and watch for a break".
+For example, Gibbs' inequality says the KL divergence (a standard measure of how
+different two probability distributions are) is never negative: KL(p, q) >= 0. It
+holds when q is a real distribution, but the moment you forget that q has to sum
+to 1, it fails, and the engine finds a q that drives the value below zero. This
+engine needs no prover and no API key.
 
-**Code.** Each Verina task ships a postcondition, a correct output, and several
-wrong outputs. Popper asks AXLE to evaluate the postcondition on those witnesses
-through `native_decide`. If a correct output is rejected, the spec is too strong.
-If a wrong output is accepted, the spec is too weak. If even garbage is accepted,
-the spec is vacuous. No mutant generation is needed because the wrong answers are
-already curated in the benchmark.
+**Code.** Each Verina task ships a correct answer and several wrong ones. Popper
+asks AXLE to evaluate the spec on each. A rejected correct answer means the spec
+is too tight. An accepted wrong answer means it is too loose. An accepted nonsense
+answer means it is empty.
 
-A counterexample is more than a failing test. It is a repair signal. Popper's M2
-loop feeds the counterexample back into the statement, strengthens or relaxes the
-relevant clause, and re-audits until the spec is faithful or the budget runs out.
+The counterexample is the part that makes this practical. A pass/fail bit tells
+you a spec is probably wrong. A counterexample tells you which input breaks it,
+which is what you actually need to fix it. The same input also works as a clean
+training signal, a reward an automated loop can optimize against with no human in
+the loop. Popper's repair loop uses the counterexample to adjust the statement and
+check again, until it holds up or the budget runs out.
 
 ## 4. The benchmark
 
-We assembled a labelled corpus of 38 formal claims and tagged each one ahead of
-time as faithful or unfaithful, with the kind of bug recorded.
+I labelled 334 statements ahead of time as faithful or unfaithful, and for the
+unfaithful ones I recorded the kind of bug. Then I ran three checkers over the
+same set.
 
-- **Math, 24 items.** Eleven faithful inequalities and identities (Gibbs, the
-  data processing inequality, entropy concavity, Cauchy-Schwarz, AM-GM, the
-  triangle inequality, subadditivity of entropy, non-negativity of mutual
-  information, the cross entropy bound, Jensen for the logarithm, non-negativity
-  of variance), eleven unfaithful twins (a dropped hypothesis, a flipped
-  direction, or an over-strong claim each), and two vacuity traps.
-- **Code, 4 items.** The offline code-spec fixtures: one faithful, plus a
-  vacuous, an incomplete, and an unsound spec.
-- **Verina, 10 items.** Real Verina tasks audited live over AXLE. These ship as
-  faithful, so they measure the false positive rate.
+- **math, 320 items.** Families of inequalities (Cauchy-Schwarz, AM-GM, the
+  triangle inequality, and several from information theory), each generated across
+  a range of sizes, with faithful and broken versions side by side, plus a few
+  "empty statement" traps. Checked by the local Monte-Carlo engine.
+- **code, 4 items.** The offline code-spec fixtures.
+- **verina, 10 items.** Real tasks checked live against AXLE, all meant to be
+  faithful, which measures the false-alarm rate.
 
-We run three judges over the same corpus.
+The three checkers are the proof checker (accepts anything that is valid as a
+proof), an LLM judge (a model reads the statement and guesses, with no execution),
+and Popper.
 
-- **Proof checker (AXLE or Lean alone).** It accepts any spec that type checks.
-  Every spec in the corpus type checks, so it accepts all of them. This is not a
-  straw man. It is exactly what a proof checker does, and the whole point is that
-  an unfaithful spec still type checks.
-- **LLM judge.** A model reads the intent and the statement and guesses, with no
-  execution and no counterexample. The harness runs this live when an API key is
-  present.
-- **Popper.** The executable oracle in this repository.
-
-### Results
-
-| judge | unfaithful caught | false positives | counterexample yield | F1 |
+| checker | unfaithful caught | false alarms | counterexample | F1 |
 |---|---|---|---|---|
-| Popper | 14/14 (100%) | 0/22 (0%) | 100% | 1.00 |
-| Proof checker | 0/14 (0%) | 0/22 (0%) | 0% | 0.00 |
-| LLM judge | live, see note | live | 0% (no witness) | live |
+| Popper | 168/168 (100%) | 0/163 (0%) | every time | 1.00 |
+| Proof checker | 0/168 (0%) | 0/163 (0%) | never | 0.00 |
+| LLM judge | runnable live | runnable live | never | runnable live |
 
-The proof checker scores zero recall no matter how strong the underlying prover
-is, because catching an unfaithful spec is outside what it does. The LLM judge can
-guess, but it never returns an executable witness. For a published reference
-point, the Verina paper reports the best general model reaching about 52%
-combined specification soundness and completeness. Re-running the benchmark with
-`--llm` fills that row from a live model.
+The proof checker scores zero no matter how strong the prover behind it is,
+because flagging a bad spec is outside what it does. The LLM judge can guess, but
+it never returns the input that breaks the spec. For a published number, the
+Verina paper puts the best general model near 52% on combined soundness and
+completeness. The full per-item table and the charts are in the repo and on the
+website.
 
-The numbers are reproducible. The math half of the benchmark needs no API key and
-no prover; it runs with `python examples/run_benchmark.py`.
+## 5. What Popper adds
 
-## 5. What Popper adds to the field
+1. A checker for the statement, not the proof. Everything else checks the proof
+   against the statement; Popper checks the statement against intent.
+2. A counterexample, not a score. A number says a spec is probably wrong; a
+   counterexample says which input breaks it.
+3. A clean training signal. The same counterexample that fixes a spec is a reward
+   an automated loop can use, with no human and no separate reward model.
+4. Honest "I don't know". When a spec cannot be decided on a test case, Popper says
+   INCONCLUSIVE instead of pretending.
 
-1. **An oracle for the specification, not the proof.** Existing tooling checks the
-   proof against the spec. Popper checks the spec against intent, which is the
-   part nothing else covers.
-2. **A counterexample, not a score.** A benchmark number tells you a spec is
-   probably wrong. A counterexample tells you which input breaks it, which is what
-   you need to fix it. Counterexample yield is the column where Popper is alone.
-3. **A clean training signal.** The same counterexample that repairs a spec is a
-   reward an automated loop can optimize against, without a human in the loop and
-   without GPU based reward models.
-4. **Honest abstention.** When a spec is not decidable on a witness, Popper
-   reports INCONCLUSIVE rather than guessing. A faithfulness tool that pretends to
-   certainty is worse than one that admits the gap.
+## 6. Limits
 
-## 6. Limitations
-
-Popper falsifies; it does not certify. A FAITHFUL verdict means no counterexample
-was found within the search budget, not a proof of faithfulness, which is
-undecidable in general. The math oracle inherits the usual limits of Monte-Carlo
-search: a bug that hides on a measure zero set can be missed, though dropped
-hypotheses, flipped directions, and over-strong claims are exactly the failures
-that show up under sampling. The code oracle depends on the quality of the wrong
-outputs that come with each task. Lean and AXLE remain the ground truth for the
+Popper breaks statements; it does not certify them. A FAITHFUL verdict means no
+counterexample was found within the budget, not that none exists, and proving none
+exists is undecidable in general. Random sampling can miss a bug that hides on a
+tiny set of inputs, though dropped assumptions and flipped directions are exactly
+the bugs that show up under sampling. Lean and AXLE stay the final word on the
 proof itself.
 
-## 7. Next steps
+## 7. Next
 
-- Run the declarative repair loop inside the live AXLE path, swapping the
-  repaired postcondition back into the prelude and re-auditing.
-- Sweep all 189 Verina tasks rather than a sample.
-- Build the self improvement loop: rank best-of-n generations by the oracle and
-  form preference pairs from oracle labels.
-- Grow the math corpus beyond information theory into measure theory and linear
-  algebra, where dropped hypotheses are common and easy to formalize wrong.
+- Run the repair loop inside the live AXLE path, swapping the fixed spec back in
+  and checking again.
+- Sweep all 189 Verina tasks instead of a sample.
+- Build the self-improvement loop: rank a model's tries by the oracle and form
+  training pairs from the labels.
+- Grow the math benchmark into measure theory and linear algebra.
 
 ## Reproduce
 
 ```bash
 python examples/run_benchmark.py            # Popper and the proof-checker baseline
 python examples/run_benchmark.py --llm      # add a live LLM judge (needs ANTHROPIC_API_KEY)
-python -m unittest discover -s tests -t .   # the full test suite
+python -m unittest discover -s tests -t .   # the tests
 ```
-
-Outputs land in `results/benchmark.json`, `results/benchmark.csv`, and
-`reports/benchmark.md`.
