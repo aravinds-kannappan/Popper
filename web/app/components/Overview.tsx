@@ -6,14 +6,16 @@ export default function Overview({ go }: { go: (tab: string) => void }) {
   return (
     <div>
       <section className="hero">
-        <div className="tag">check that the statement is right, then prove it</div>
-        <h1>The proof can be perfect and the result still wrong</h1>
+        <div className="tag">semantic-fault tolerance for formal provers</div>
+        <h1>Don&apos;t burn proof compute on a statement that was wrong to begin with</h1>
         <p>
-          When you verify code or math with a computer, you write a statement of what is supposed to
-          be true (a "spec") and prove your work matches it. The weak spot is the statement itself:
-          it can be too loose, too tight, or empty, and the proof still passes. I built Popper to go
-          after the statement directly. It tries to break the statement, and when it succeeds it
-          hands you the exact input that breaks it.
+          Provers like AXLE and AxiomProver crash at type-checking on typo-heavy Lean or
+          non-existent Mathlib terms, and they will happily certify a flawless proof of a spec that
+          was never the one you meant. Popper is the buffer in front of them. It reads through the
+          noise to recover the claim you&apos;re gesturing at, intercepts the syntax faults, and runs
+          rapid-fire (~30ms) adversarial fuzzing on AXLE&apos;s substrate to break weak premises —
+          handing back the exact matrix or graph counterexample before a single cycle of expensive,
+          long-running proof search is spent.
         </p>
         <div className="cta">
           <button className="btn" onClick={() => go("benchmark")}>

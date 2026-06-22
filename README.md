@@ -1,178 +1,225 @@
 # Popper
 
-**Check that the statement is right, then prove it.**
+**A semantic-fault-tolerant pre-flight layer for formal provers. Break the statement before you pay to prove it.**
 
-Popper is the project in this repo. `falsify` is the Python package that runs it.
-Popper is the system; `falsify` is the code.
+Popper is the system. [`falsify`](./falsify) is the Python package that runs it.
+Popper sits in front of a prover like Axiom's [AXLE](https://axle.axiommath.ai)
+and AxiomProver and answers the one question those engines structurally cannot:
+*is this even the right statement to prove, and did the author write something a
+machine can read at all?*
 
-## What Popper does, in one paragraph
+---
 
-When you prove something with a computer, you write down a statement (a "spec",
-short for specification, which is just a precise description of what the code or
-the math is supposed to do) and then you prove that your work matches that
-statement. The catch is that the statement itself might be wrong. It might be too
-loose, so it accepts wrong answers. It might be too tight, so it rejects right
-ones. It might say nothing at all, so everything passes. In every one of those
-cases the proof still goes through and the whole thing looks correct, and it
-isn't. Popper is a small tool that goes after the statement directly. It tries to
-break the statement by finding an input that makes it fail, and when it finds one
-it hands you that input. I call this input a counterexample: a concrete case that
-shows the statement is wrong. If Popper cannot break the statement after a lot of
-trying, that is some evidence the statement is fine, but it is not a proof, and I
-am careful to say so.
+## TL;DR for the engineer evaluating this
 
-## Why I built it
+- **The problem.** Formal provers are brittle at the front door. The moment a user
+  hands them flawed, typo-heavy Lean or references a Mathlib term that does not
+  exist, an engine like AxiomProver dies at the type-checking phase. It never sees
+  the *mathematical intent*; it sees a parse failure and stops.
+- **What Popper does.** Popper is a buffer in front of the prover. It reads between
+  the lines to deduce what the user is *gesturing at* mathematically, intercepts the
+  syntax errors before they reach the prover, and uses AXLE's substrate to run
+  rapid-fire (~30 ms/probe) adversarial fuzzing against the statement. This is its
+  **semantic-fault-tolerance** layer.
+- **The payoff.** It catches spec-faithfulness failures and weak premises — surfacing
+  the actual matrix or graph counterexample that breaks the claim — *before* a single
+  cycle of expensive, long-running, multi-agent proof search is spent on a theorem
+  that is unprovable or vacuous.
 
-I kept seeing the same gap. The tools that prove things have gotten very good. A
-prover like Axiom's [AXLE](https://axle.axiommath.ai) can take a statement and a
-proof and tell you, for certain, whether the proof is valid. What it cannot tell
-you is whether the statement is the one you meant. It only ever checks the proof
-against the statement, never the statement against your actual intent. So if the
-statement is wrong, the prover happily certifies a proof of the wrong thing and
-reports success.
+---
 
-This is not a small corner case. On Verina, a benchmark of code-with-specs, the
-best general model writes code that is correct about 73% of the time but writes
-specs that are both sound and complete only about 52% of the time. ("Sound" here
-means the spec does not reject a correct answer; "complete" means it does not
-accept a wrong one.) In other words the spec, not the proof, is where things go
-wrong, and the prover is blind to it. That blind spot is the whole reason Popper
-exists.
+## The problem: provers are blind in two directions
 
-## How Popper compares to the tools people already use
+A modern prover is a verifier. Hand it a statement and a proof and it tells you, for
+certain, whether the proof is valid. That is a strong guarantee, and it has two blind
+spots that compound each other.
 
-I find it easiest to think about three levels of trust, and what each one still
-misses.
+**1. It is blind to malformed intent.** The verifier only runs once the statement
+type-checks. Real users do not write clean Lean. They write typos, they invent
+Mathlib lemmas that were renamed three releases ago, they get an implicit argument
+wrong. AxiomProver does not degrade gracefully on this input — it crashes at the
+elaboration/type-checking phase and returns nothing useful. The mathematical idea the
+user was reaching for is lost in a parse error.
 
-- **A model writes or explains a proof.** You get something that reads well, and
-  you get no guarantee. A wrong step, a skipped case, or an off-by-one error is
-  invisible unless an expert reads it carefully. Popper is not trying to replace
-  this; it is pointing out that fluent text is not the same as a correct result.
-- **A model plus a prover like Lean or AXLE.** Now you get a real proof that
-  matches the statement, which is a big step up. But you are still trusting the
-  statement. A statement that says nothing (for example, "for all x, true") proves
-  instantly. A statement that defines "sorted" as "same length as the input" is
-  satisfied by code that does nothing at all. The prover will not complain, because
-  there is nothing wrong with the proof. The thing being proved is the problem.
-- **A model plus a prover plus Popper.** The proof matches the statement, and on
-  top of that an independent check has actively tried to break the statement. If
-  it could not, you have more reason to trust the spec. If it could, you get the
-  exact input that breaks it, which tells you what to fix.
+**2. It is blind to the statement's faithfulness.** Even when the statement compiles,
+the prover only ever checks the *proof* against the *statement* — never the statement
+against the author's actual intent. So a statement that is too loose (accepts wrong
+answers), too tight (rejects right ones), or vacuous (`∀ x, true`) still gets a clean,
+certified proof. You walk away believing you verified something. You did not.
 
-What Popper adds that the others do not have: it looks at the spec, not the proof,
-and when it finds a problem it gives you a concrete counterexample instead of a
-score or a shrug.
+This is not a corner case. On Verina, a benchmark of code-with-specs, the best general
+model writes correct *code* about 73% of the time but writes *specs* that are both
+sound and complete only about 52% of the time. The spec, not the proof, is where the
+errors live — and the verifier cannot see them.
 
-## Popper and AxiomProver
+## The solution: Popper as a semantic-fault-tolerant screen
 
-Axiom Math ships two things I lean on here. [AXLE](https://axle.axiommath.ai) is
-the Lean engine, the API that type-checks a statement and runs the counterexample
-search. AxiomProver is the prover: an agent that takes a statement and searches for
-a full Lean proof of it, and it is very strong at that (it clears competition-level
-problems and most of Verina's proof task). Popper is not a competitor to either. It
-answers a different question and sits in front of the prover.
+Popper does not prove. It *breaks*. It sits in front of the prover as a cheap,
+fast screen and does three things the prover cannot:
 
-The split is clean:
+1. **Reads intent through noise.** Instead of rejecting malformed Lean, Popper's agent
+   layer deduces what the user is gesturing at mathematically — recovering the claim
+   behind the typo, the renamed Mathlib term, the off-by-one in an implicit argument —
+   and reconstructs a checkable statement from it.
+2. **Intercepts syntax faults before the prover.** Parse and elaboration failures are
+   caught and repaired at the buffer, so they never reach (and never crash) the
+   expensive multi-agent proof loop.
+3. **Fuzzes the statement adversarially on AXLE's substrate.** Once there is a
+   checkable statement, Popper runs rapid-fire adversarial probes (~30 ms each) to try
+   to *falsify* it — driving thousands of Monte-Carlo draws for math, or evaluating
+   the spec against known-good and known-bad witnesses for code. When it breaks the
+   statement, it returns the concrete **counterexample**: the exact matrix, vector, or
+   graph that exposes the weak premise.
 
-- **AxiomProver answers "can this statement be proved, and here is the proof."**
-  It is the verifier. Its blind spot is the statement itself: it will prove
-  whatever you hand it, faithful or not.
-- **Popper answers "is this statement the right one to prove."** It is the screen.
-  It does not produce proofs and it does not certify; it tries to break the spec
-  and hands back a counterexample when it can.
+The verdict vocabulary is deliberately small and honest: `FAITHFUL` (could not break
+it within budget — *not* a certificate), `FALSIFIED`, `UNSOUND` (spec too strong),
+`INCOMPLETE` (spec too weak), `VACUOUS` (spec constrains nothing), `INCONCLUSIVE`
+(insufficient signal, reported rather than guessed).
 
-Why I think Popper is worth running before AxiomProver, and why it saves compute:
+## The value: protect the expensive compute
 
-- **Proving is expensive; breaking is cheap.** A proof search is heavy compute. A
-  Monte-Carlo pass or a handful of witness checks is not. It is wasteful to point
-  the expensive tool at a statement the cheap tool can already show is wrong.
-- **A vacuous or too-weak spec proves easily, and certifies nothing.** AxiomProver
-  would return a clean proof of "for all x, true" or of "sorted means same length,"
-  and you would walk away thinking you verified something. Popper catches that
-  before any proof compute is spent, so you do not burn a proof on a statement that
-  guarantees nothing.
-- **A wrong or too-strong spec is unprovable, and the prover can grind on it.**
-  AxiomProver may spend a large search budget failing to prove a statement that is
-  false because the spec has a bug. Popper finds the breaking input quickly and
-  says "fix the spec," so the compute goes to repairing the statement instead of
-  hunting for a proof that cannot exist.
-- **The counterexample is the repair signal.** The loop is: Popper breaks the
-  spec, you (or a model) fix it using the witness, and only then does AxiomProver
-  prove the fixed statement. That is the "falsify the spec, then verify the proof"
-  idea, with Popper as the gate.
+Proving is expensive. Multi-agent proof search burns a large, long-running budget.
+Breaking is cheap. It is wasteful — and it is the failure mode in production today —
+to point the expensive tool at a statement the cheap tool can already show is wrong.
 
-| | AxiomProver | Popper |
+- **Vacuous / too-weak specs prove easily and certify nothing.** AxiomProver would
+  return a clean proof of `∀ x, true` or of "sorted means same length." Popper catches
+  it before any proof compute is spent.
+- **Wrong / too-strong specs are unprovable, and the prover grinds.** AxiomProver can
+  exhaust a large search budget failing to prove something false because the *spec* has
+  a bug. Popper finds the breaking input in milliseconds and says "fix the spec."
+- **The counterexample is the repair signal.** Popper breaks the spec → a model (or a
+  human) fixes it using the witness → *then* AxiomProver proves the repaired statement.
+  The counterexample doubles as a clean RL reward for the repair loop.
+
+| | AxiomProver / AXLE | Popper |
 |---|---|---|
-| Question | Can this statement be proved? | Is this the right statement to prove? |
-| Method | Search for a Lean proof | Try to break the statement |
+| Question | Can this statement be proved? | Is this the right, well-formed statement to prove? |
+| Method | Multi-agent search for a Lean proof | Recover intent, then adversarially fuzz the statement |
+| Behavior on malformed input | Crashes at type-checking | Reads through it, repairs, continues |
 | Output | A proof, or failure | A counterexample, or "no break found" |
-| Cost | High | Low |
-| Blind to | Whether the statement is faithful | It does not prove or certify |
-| Role | The verifier | The screen in front of the verifier |
+| Cost | High, long-running | Low, ~30 ms/probe |
+| Role | The verifier | The semantic-fault-tolerant screen in front of it |
 
-So the two are complementary. Popper makes sure AxiomProver's compute is spent on
-statements that are worth proving, and AxiomProver gives the real proof once the
-statement holds up. On the website, AXLE is the engine Popper drives, and the live
-agent shows the screening half in action.
+The two are complementary. Popper keeps the prover's compute on statements that are
+well-formed and worth proving; AxiomProver delivers the real proof once the statement
+holds up.
 
-## How it works
+---
 
-There is one common interface (`falsify/core/oracle.py`) and two engines behind
-it. An engine takes a statement, tries to break it, and reports a verdict:
-FAITHFUL (could not break it within the budget), FALSIFIED, UNSOUND, INCOMPLETE,
-VACUOUS, or INCONCLUSIVE (not enough signal to say, reported honestly rather than
-guessed).
+## System design
 
-- **Math.** Most inequalities and identities can be checked with numbers. The
-  statement carries an assumption and a conclusion, and the engine samples
-  thousands of random cases and checks whether the conclusion holds whenever the
-  assumption does. This is a Monte-Carlo check, which is just a fancy way of
-  saying "try a lot of random inputs and see if anything breaks." If the statement
-  dropped an assumption or flipped a direction, some random case breaks it, and
-  that case is the counterexample. This engine runs locally with no prover and no
-  API key.
-- **Code.** Each Verina task comes with a correct answer and several wrong
-  answers. Popper asks AXLE to evaluate the spec on each of them. If a correct
-  answer is rejected, the spec is too tight (unsound). If a wrong answer is
-  accepted, the spec is too loose (incomplete). If even nonsense is accepted, the
-  spec is empty (vacuous).
+Popper is built around one principle: **a cheap, executable falsification signal is
+worth more than an expensive certificate when the input is untrusted.** Everything
+flows from that.
 
-A counterexample is more useful than a pass/fail bit. It tells you which input
-breaks the spec, so it doubles as a repair hint. Popper's repair loop (milestone
-M2) takes the counterexample, adjusts the statement, and checks again, until the
-statement holds up or it runs out of budget.
+```
+        ┌──────────────────────── Popper ────────────────────────┐
+ user   │                                                          │
+ input  │   ┌────────────┐   ┌──────────────┐   ┌──────────────┐  │
+ ─────► │   │ intent     │──►│ statement     │──►│ falsification │  │──► verdict
+ (noisy │   │ recovery   │   │ reconstruction│   │ oracle        │  │   + counterexample
+ Lean / │   │ (agent)    │   │ (checkable)   │   │ (engines)     │  │
+ NL /   │   └────────────┘   └──────────────┘   └──────┬───────┘  │
+ spec)  │                                              │          │
+        │                                       ┌──────▼───────┐  │
+        │                                       │ AXLE substrate│ │
+        │                                       │ (~30ms probes)│ │
+        │                                       └──────────────┘  │
+        └──────────────────────────────────────────────────────────┘
+                                                       │ FAITHFUL & well-formed
+                                                       ▼
+                                          ┌────────────────────────┐
+                                          │ AxiomProver (expensive  │
+                                          │ multi-agent proof loop) │
+                                          └────────────────────────┘
+```
+
+The contract between layers is a single interface, `falsify/core/oracle.py`: an
+`Oracle` takes a formalized claim and returns a `Verdict` plus an optional
+counterexample. Two engines implement that interface, so the same audit, repair, and
+reporting machinery works across both math and code surfaces.
+
+## Architecture
+
+There is one common interface and two falsification engines behind it.
+
+- **`core/`** — the substrate. `oracle.py` defines the `Verdict` enum and the abstract
+  `Oracle` (the only contract every engine honors). `audit.py` is the shared run/report
+  machinery so a new engine inherits auditing for free.
+
+- **`montecarlo/` — the numerical engine (math).** Most inequalities and identities are
+  checkable with numbers. A statement carries an assumption and a conclusion; the engine
+  draws thousands of random cases and checks the conclusion holds whenever the assumption
+  does. Drop an assumption or flip a direction and some random draw breaks it — that draw
+  *is* the counterexample (e.g. a `q` with `∑q ≠ 1` driving KL divergence negative, or a
+  non-Markov triple where `I(X;Z) > I(X;Y)`). Runs locally; **no prover, no API key.**
+
+- **`speccheck/` — the offline code-spec engine.** A task model (`task.py`), fixtures
+  (`fixtures.py`), and a mutation/fuzzing layer (`mutation.py`) that generates
+  plausible-but-wrong implementations and adversarial inputs. The spec is evaluated
+  against a correct reference and several wrong ones: a rejected correct answer ⇒
+  `UNSOUND`; an accepted wrong answer ⇒ `INCOMPLETE`; an accepted nonsense answer ⇒
+  `VACUOUS`.
+
+- **`live/` — the AXLE substrate.** `axle.py` is a thin synchronous handle over the
+  official async `axle` client (`pip install axiom-axle`); `verina.py` drives the real
+  189-task Verina benchmark against live Lean. This is where the rapid-fire `check` /
+  `disprove` probes run.
+
+- **`repair/` — the counterexample-driven repair loop (M2).** Takes a falsifying witness,
+  adjusts the statement, and re-checks until it holds up or the budget runs out. This is
+  the "falsify the spec, then verify the proof" loop in code.
+
+- **`bench/` — the benchmark harness.** `corpus.py` (the labelled set), `judges.py`
+  (Popper, the proof-checker baseline, the LLM judge), `metrics.py`, and `run.py`.
+
+- **`web/` — the site.** A live Popper agent (Opus + AXLE tools), the offline oracle
+  benchmark with charts, the audit dashboard, and the research write-up. The agent's
+  `check`/`disprove` tools call the same AXLE substrate; keys are server-side only.
+
+## Repository structure
+
+```
+falsify/             the implementation package
+  core/        shared substrate: Verdict, Oracle, audit + report machinery
+  montecarlo/  (M1) numerical engine for math statements
+  speccheck/   (M1) offline code-spec engine: task model, fixtures, mutation/fuzz
+  live/        the live AXLE substrate (axle.py) + Verina driver (verina.py)
+  repair/      (M2) counterexample-driven repair loop
+  bench/       benchmark: corpus, judges, metrics, runner
+examples/      runnable scripts (audit_math, audit_verina, verina_live_audit, repair_demo, run_benchmark)
+tests/         unit tests
+reports/       written reports, including benchmark.md and research.md
+results/       machine-readable results (JSON and CSV)
+notebook/      Popper.ipynb, a walkthrough with outputs
+web/           the Next.js site: live agent, benchmark + charts, audits, research
+```
 
 ## The benchmark
 
-I wanted a number, not just an argument. So I built a benchmark: a set of 346
-statements where I know the right answer ahead of time (faithful or unfaithful,
-and if unfaithful, what kind of bug it is). Then I run three checkers over the
-same set and see how many of the unfaithful ones each catches.
+346 statements labelled by hand (faithful or unfaithful, and if unfaithful, the bug
+kind), three checkers run over the same set.
 
-- **math, 332 items.** Many families of inequalities (Cauchy-Schwarz, AM-GM, the
-  triangle inequality, several from information theory, and more), each generated
-  across a range of sizes, with faithful versions and broken versions side by
-  side, plus a batch of "subtle" bugs that only fail on a tiny fraction of inputs.
-  These are run for real by the local Monte-Carlo engine every time, so this part
-  needs no API key.
-- **code, 4 items.** The offline code-spec fixtures.
-- **verina, 10 items.** Real Verina tasks, with verdicts replayed from an earlier
-  live AXLE run. They are meant to be faithful, so they measure how often a checker
-  raises a false alarm.
+- **math, 332 items** — families of inequalities (Cauchy–Schwarz, AM–GM, triangle,
+  information-theoretic, …) generated across sizes, with faithful and broken variants
+  side by side, plus a batch of "subtle" bugs that fail on a tiny fraction of inputs.
+  Run for real by the local Monte-Carlo engine; no API key.
+- **code, 4 items** — offline code-spec fixtures.
+- **verina, 10 items** — real Verina tasks, verdicts replayed from a live AXLE run;
+  meant to be faithful, so they measure false-alarm rate.
 
 | checker | unfaithful caught | false alarms | gives a counterexample | F1 |
 |---|---|---|---|---|
-| Popper | 176/178 (99%) | 0/165 (0%) | yes, every time | 0.99 |
+| **Popper** | 176/178 (99%) | 0/165 (0%) | yes, every time | 0.99 |
 | Proof checker (AXLE/Lean) | 0/178 (0%) | 0/165 (0%) | no | 0.00 |
-| LLM judge (a model reads the spec and guesses) | runnable live | runnable live | no | runnable live |
+| LLM judge (model reads spec, guesses) | runnable live | runnable live | no | runnable live |
 
-**Why 99% and not 100%, and why the F1 is a real number.** The two specs Popper
-misses at this setting are the rarest subtle bugs: they fail on roughly 1 input in
-10,000, and at a budget of 2,000 random draws Popper sometimes does not hit the bad
-input. That is honest, and it is exactly the limitation I document. Spend more
-draws and it finds them. The benchmark records this as a sweep:
+The two specs Popper misses fail on ~1 input in 10,000; at a 2,000-draw budget the
+sampler sometimes does not hit the bad input. That is an honest, documented limit, and
+it closes with more draws:
 
-| draws per statement | math recall | math F1 | subtle bugs caught | subtle-bug F1 |
+| draws/statement | math recall | math F1 | subtle bugs caught | subtle-bug F1 |
 |---|---|---|---|---|
 | 100 | 98% | 0.99 | 6/10 (60%) | 0.75 |
 | 500 | 99% | 0.99 | 8/10 (80%) | 0.89 |
@@ -180,29 +227,50 @@ draws and it finds them. The benchmark records this as a sweep:
 | 10,000 | 100% | 1.00 | 10/10 (100%) | 1.00 |
 | 50,000 | 100% | 1.00 | 10/10 (100%) | 1.00 |
 
-The proof checker catches none of them at any budget, and that is not a knock on
-the prover. It is the point: catching a bad spec is simply not a thing a proof
-checker does, because every spec in the set is valid as far as the proof is
-concerned. The LLM judge can sometimes guess right, but it never hands you the
-input that breaks the spec. For a published number, the Verina paper puts the best
-general model around 52% on combined spec soundness and completeness. Run it
-yourself:
+The proof checker scores zero at every budget — by design, not weakness. Flagging a bad
+spec is simply not a thing a proof checker does, because every spec in the set is valid
+as far as the *proof* is concerned.
 
 ```bash
-python examples/run_benchmark.py          # Popper and the proof-checker baseline, offline
+python examples/run_benchmark.py          # Popper vs proof-checker baseline, offline
 python examples/run_benchmark.py --llm    # add a live LLM judge (needs ANTHROPIC_API_KEY)
 ```
 
-Outputs go to `results/benchmark.json`, `results/benchmark.csv`, and
-[`reports/benchmark.md`](./reports/benchmark.md). The website draws charts from
-the same data.
+Outputs: `results/benchmark.json`, `results/benchmark.csv`,
+[`reports/benchmark.md`](./reports/benchmark.md). The site charts the same data.
+
+## Tradeoffs
+
+Engineering Popper meant choosing falsification over certification on purpose. The
+costs of that choice, stated plainly:
+
+- **Falsification is sound but not complete.** A `FAITHFUL` verdict means Popper could
+  not find a counterexample within budget — *not* that none exists. Proving no
+  counterexample exists is undecidable in general, so Popper never claims it. The value
+  is asymmetric and that is fine: a cheap "this is definitely broken, here's why" is
+  worth far more than an expensive "probably ok."
+- **Sampling can miss measure-zero bugs.** Random draws can miss a bug that hides on a
+  tiny set of inputs (the 2 of 178 above). The mitigation is budget — recall climbs to
+  100% with more draws — and the bugs that matter most in practice (dropped assumptions,
+  flipped directions) fail on a large fraction of inputs and fall out immediately.
+- **Intent recovery is best-effort.** Reading through malformed Lean is heuristic and
+  agent-driven; it will not always reconstruct the user's idea. But the failure mode is
+  graceful (`INCONCLUSIVE`, hand back to the user) rather than a hard crash — strictly
+  better than the prover's parse-error wall.
+- **Cheap probes, not formal models.** The ~30 ms adversarial probes are executable
+  checks, not symbolic reasoning. They trade theoretical guarantees for throughput,
+  which is exactly the right trade for a *screen* whose job is to protect the expensive
+  layer behind it.
+- **Honesty over coverage.** When a spec cannot be decided on a test case, Popper
+  reports `INCONCLUSIVE` instead of guessing. This lowers headline "accuracy" versus a
+  judge that always answers, and it is the correct behavior for a tool feeding a formal
+  pipeline.
 
 ## Other results
 
-All reports are in [`reports/`](./reports). Machine-readable copies (JSON and CSV)
-are in [`results/`](./results).
+All reports in [`reports/`](./reports); machine-readable copies in [`results/`](./results).
 
-Live Verina spec check against AXLE, real tasks and real Lean:
+Live Verina spec check against AXLE (real tasks, real Lean):
 
 ```
 [FAITHFUL    ] verina_basic_1   correct answers accepted; every wrong answer rejected
@@ -210,7 +278,7 @@ Live Verina spec check against AXLE, real tasks and real Lean:
 ... 10 claims | FAITHFUL 8  INCONCLUSIVE 2
 ```
 
-Math engine, faithful statements survive and broken ones get a counterexample:
+Math engine (faithful statements survive; broken ones yield a counterexample):
 
 ```
 kl_nonneg_DROPPED_norm    sum q = 3.53 (not 1) => KL = -1.15 < 0
@@ -218,7 +286,7 @@ dpi_DROPPED_markov        I(X;Z) = 0.83 > I(X;Y) = 0.05  (Z leaks X directly)
 entropy_convex_WRONG      H(mix) = 1.08 > the average 1.06  (entropy is concave, not convex)
 ```
 
-Repair loop, every broken spec driven back to faithful by its own counterexample:
+Repair loop (every broken spec driven back to faithful by its own counterexample):
 
 ```
 sort_by_length        VACUOUS    -> FAITHFUL   (length-only spec, add sortedness and permutation)
@@ -226,33 +294,15 @@ max_lower_bound_only  INCOMPLETE -> FAITHFUL   (out >= a and out >= b, also requ
 abs_strictly_positive UNSOUND    -> FAITHFUL   (out > 0 rejects abs(0) = 0, relax to >=)
 ```
 
-## Repository layout
-
-```
-falsify/             the implementation package
-  core/        shared pieces: Verdict, Oracle, audit and report
-  montecarlo/  (M1) the numerical engine for math statements
-  speccheck/   (M1) the offline code-spec engine, task model, fixtures, mutation
-  live/        the live Verina check against AXLE (axle.py + verina.py)
-  repair/      (M2) the counterexample-driven repair loop
-  bench/       the benchmark (corpus, judges, metrics, runner)
-examples/      runnable scripts (audit_math, audit_verina, verina_live_audit, repair_demo, run_benchmark)
-tests/         unit tests
-reports/       written reports, including benchmark.md and research.md
-results/        machine-readable results (JSON and CSV)
-notebook/      Popper.ipynb, a walkthrough with outputs
-web/           the website: overview, benchmark with charts, audits, research, and a Claude agent
-```
-
 ## Quickstart
 
-No third-party packages for the core, Python 3.10 or newer:
+No third-party packages for the core, Python 3.10+:
 
 ```bash
-python examples/audit_math.py        # the math engine on an information-theory ladder
-python examples/audit_verina.py      # the code-spec engine on offline fixtures
+python examples/audit_math.py        # math engine on an information-theory ladder
+python examples/audit_verina.py      # code-spec engine on offline fixtures
 python examples/repair_demo.py       # the repair loop
-python examples/run_benchmark.py     # the benchmark (Popper vs the proof-checker baseline)
+python examples/run_benchmark.py     # the benchmark (Popper vs proof-checker baseline)
 python -m unittest discover -s tests -t .   # the tests
 ```
 
@@ -264,65 +314,25 @@ export AXLE_API_KEY=...                                 # https://axle.axiommath
 python examples/verina_live_audit.py --limit 8
 ```
 
-## The live demo and its benchmark
-
-The website opens on a Live demo: the Popper agent chat is front and center, which
-is Popper in action. Ask it math or logic claims; for anything it can check it
-tries to break the claim through AXLE and shows the real result.
-
-The interesting part is that the benchmark is built from that conversation, not
-from a canned set. After you send 10 messages, a live benchmark unlocks below the
-chat. The three systems compared are the Popper agent (Opus with AXLE and the
-falsificationist reasoning), the same model on its own with no tools, and AXLE by
-itself (the bare prover, no agent, using its raw counterexample search result from
-your chat). A separate evaluator agent decides the true answer (treating what AXLE
-found in your chat as authoritative) and grades them. Those grades become the
-metrics: accuracy, F1, MCC (Matthews correlation coefficient, a balanced score in
--1 to 1), counterexample yield, and average quality, one row per system, so the
-numbers come out as a real spread rather than a fixed score. Seeing AXLE on its
-own is the point: it can refute a false claim when the witness is small, but it
-cannot confirm a true one, which is the gap the Popper agent fills. The 10 graded results are then bootstrapped to 500 resamples to put
-honest confidence intervals on each metric. ("Scaling 10 to 500" means resampling
-for tighter estimates, not inventing 500 new data points.)
-
-This is a different measurement from the offline benchmark above. The offline one
-asks whether the detection engine catches planted bugs. The live one asks how the
-agent does on your real questions, next to plain models and with AXLE in the loop.
-The code is in `web/app/api/benchmark/route.ts`, `web/app/lib/agent.ts` (the plain
-baselines and the evaluator agent), and `web/app/components/AgentLab.tsx`.
-
 ## The website and its API keys
 
-The site in [`web/`](./web) has the Live demo, an Overview, the offline oracle
-benchmark with charts, the audit results, the Research write-up, and the live
-Claude agent. To be clear about keys: the local math benchmark needs none, but the
-deployed site does need two, set as environment variables (on Vercel, in the
-project settings):
+The site in [`web/`](./web) has the Live demo, an Overview, the offline oracle benchmark
+with charts, the audit results, and the Research write-up. The local math benchmark needs
+no keys; the deployed site needs two (set as Vercel env vars):
 
-- `ANTHROPIC_API_KEY` powers the Claude agent (`web/app/api/chat/route.ts`) and
-  the live benchmark (`web/app/api/benchmark/route.ts`).
-- `AXLE_API_KEY` powers the agent's live disprove and check tools against the
-  Axiom Lean Engine (`web/app/lib/axle.ts`).
+- `ANTHROPIC_API_KEY` — powers the Claude agent (`web/app/api/chat/route.ts`) and the
+  live benchmark (`web/app/api/benchmark/route.ts`).
+- `AXLE_API_KEY` — powers the agent's live `disprove`/`check` tools against the Axiom
+  Lean Engine (`web/app/lib/axle.ts`).
 
-Both are read server-side only and are never sent to the browser. The full list,
-including the optional `ANTHROPIC_MODEL`, `AXLE_ENVIRONMENT`, and `AXLE_BASE_URL`,
-is in [`web/.env.example`](./web/.env.example). The agent and AXLE wiring is
-unchanged, so if those keys are already set on Vercel everything keeps working.
-
-## A note on honesty
-
-Popper breaks statements; it does not certify them. A FAITHFUL verdict means
-Popper could not find a counterexample within its budget, not that none exists.
-Proving that no counterexample exists is undecidable in general, so I do not claim
-it. What Popper does catch is the common, real failure: a dropped assumption, a
-flipped direction, a spec that is too loose or too tight. Lean and AXLE remain the
-final word on the proof itself. When a spec cannot be decided on a test case,
-Popper says INCONCLUSIVE instead of guessing.
+Both are read server-side only and never sent to the browser. The full list (including
+optional `ANTHROPIC_MODEL`, `AXLE_ENVIRONMENT`, `AXLE_BASE_URL`) is in
+[`web/.env.example`](./web/.env.example).
 
 ## License and data
 
-Apache-2.0 (see [`LICENSE`](./LICENSE)). The Verina benchmark is CC-BY-SA-4.0 and
-is not stored here; it is fetched on demand from
-[`sunblaze-ucb/verina`](https://github.com/sunblaze-ucb/verina) into a git-ignored
-cache. Built on the open [AXLE](https://github.com/AxiomMath/axiom-lean-engine)
-engine and [Mathlib](https://github.com/leanprover-community/mathlib4).
+Apache-2.0 (see [`LICENSE`](./LICENSE)). The Verina benchmark is CC-BY-SA-4.0 and is
+not stored here; it is fetched on demand from
+[`sunblaze-ucb/verina`](https://github.com/sunblaze-ucb/verina) into a git-ignored cache.
+Built on the open [AXLE](https://github.com/AxiomMath/axiom-lean-engine) engine and
+[Mathlib](https://github.com/leanprover-community/mathlib4).
