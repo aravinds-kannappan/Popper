@@ -72,7 +72,7 @@ export default function Site() {
         {tab === "research" && (
           <section className="section first">
             <h2>
-              Research <span className="sub">what Popper adds to a prover stack</span>
+              Research <span className="sub">the theory, the logic, and where Popper fits</span>
             </h2>
             <Research />
           </section>
