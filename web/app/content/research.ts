@@ -107,6 +107,42 @@ The division of labor is clean: AxiomProver answers "can this be proved, and her
 proof"; Popper answers "is this a well-formed statement worth proving, and if not, here
 is the input that shows why." They are complementary, not competing.
 
+## How Popper differs from LLM approaches
+
+The published numbers explain why Popper is a different kind of tool, not a better model.
+The community has largely solved *proving a given statement* and left *checking the
+statement* exposed.
+
+**LLM theorem provers are strong, given a statement.** DeepSeek-Prover-V2 reaches 88.9% on
+miniF2F-test and solves 49 of 658 PutnamBench problems [2]. Axiom's AxiomProver scored a
+perfect 120/120 on Putnam 2025, ahead of the top human competitor (110) and the best
+informal AI system (103) [4]. Once the statement is fixed and faithful, finding the proof
+is increasingly tractable.
+
+**The statement is where models fail.** On Verina, the strongest model (OpenAI o3) writes
+correct code 72.6% of the time, writes specifications that are simultaneously sound and
+complete only 52.3% of the time, and produces a complete proof on just 4.9% of tasks [1].
+Direct autoformalization is harder still: the canonical study by Wu et al. translates only
+25.3% of competition problems into a faithful formal statement [3]. Crucially, that same
+work observes that no automated system verifies a translation is correct with high
+certainty [3]. That sentence is the entire opening for Popper.
+
+**An LLM-as-judge reads and guesses.** A model asked to grade a spec produces a verdict
+with no execution and no witness; it cannot return the input that breaks the statement, and
+its judgment inherits the same blind spots as the model that wrote the spec.
+
+| tool | what it optimizes | representative result | counterexample |
+|---|---|---|---|
+| LLM theorem prover (DeepSeek-Prover-V2, AxiomProver) | a proof, given a statement | 88.9% miniF2F [2]; 120/120 Putnam 2025 [4] | no |
+| LLM spec writer / autoformalizer | a formal statement from intent | 52.3% sound+complete [1]; 25.3% faithful autoformalization [3] | no |
+| LLM-as-judge | a verdict by reading the spec | guesses, no execution | no |
+| Popper | breaking the statement | 99% of planted bugs caught, 0 false alarms | every time |
+
+Provers and judges sit downstream of a statement they assume is right. Popper is the only
+one of these that attacks that assumption and the only one that returns the input proving
+it wrong, which is why it belongs in front of AXLE and AxiomProver [5] rather than beside
+them.
+
 ## Three levels of trust
 
 1. A model writes a proof in prose. It reads well and guarantees nothing.
@@ -159,4 +195,26 @@ flipped directions, the bugs that dominate in practice, fail on a large fraction
 inputs and surface immediately. Intent recovery is best-effort and heuristic, but its
 failure mode is graceful rather than a hard crash. Lean and AXLE remain the final word on
 the proof itself.
+
+## References
+
+1. Z. Ye et al. **VERINA: Benchmarking Verifiable Code Generation.** arXiv:2505.23135.
+   The source of the 72.6% code / 52.3% spec / 4.9% proof figures and the soundness and
+   completeness definitions. [arxiv.org/abs/2505.23135](https://arxiv.org/abs/2505.23135)
+2. DeepSeek-AI. **DeepSeek-Prover-V2: Advancing Formal Mathematical Reasoning via
+   Reinforcement Learning for Subgoal Decomposition.** arXiv:2504.21801. 88.9% on
+   miniF2F-test, 49/658 on PutnamBench.
+   [arxiv.org/abs/2504.21801](https://arxiv.org/abs/2504.21801)
+3. Y. Wu, A. Q. Jiang, W. Li, M. N. Rabe, C. Staats, M. Jamnik, C. Szegedy.
+   **Autoformalization with Large Language Models.** arXiv:2205.12615. 25.3% faithful
+   autoformalization, and the observation that no automated system verifies a translation
+   with high certainty. [arxiv.org/abs/2205.12615](https://arxiv.org/abs/2205.12615)
+4. Axiom Math. **AxiomProver and the AXLE Lean Engine.** The 120/120 Putnam 2025 result
+   (top human 110, best informal AI 103) and the public Lean verification API Popper
+   drives. [axiommath.ai](https://axiommath.ai) and
+   [axle.axiommath.ai](https://axle.axiommath.ai)
+5. AxiomMath. **AXLE: the Axiom Lean Engine (client and verification API).**
+   [github.com/AxiomMath/axiom-lean-engine](https://github.com/AxiomMath/axiom-lean-engine)
+   and [leanprover-community/mathlib4](https://github.com/leanprover-community/mathlib4),
+   the Lean and Mathlib substrate underneath.
 `;

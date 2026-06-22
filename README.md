@@ -107,6 +107,47 @@ holds up.
 
 ---
 
+## Why Popper is necessary
+
+The field has spent its effort on the proving half and left the statement half exposed.
+The published numbers make the imbalance concrete, and they are the reason a tool like
+Popper has to exist.
+
+- **LLM theorem provers are strong, once you hand them a statement.**
+  [DeepSeek-Prover-V2](https://arxiv.org/abs/2504.21801) reaches 88.9% on miniF2F-test,
+  and Axiom's [AxiomProver](https://axiommath.ai) scored a perfect 120/120 on Putnam 2025,
+  ahead of the top human competitor at 110 and the best informal AI at 103. Finding a
+  proof of a given statement is increasingly a solved problem.
+- **The statement is where models actually fail.** On
+  [Verina](https://arxiv.org/abs/2505.23135), the strongest model (OpenAI o3) writes
+  correct code 72.6% of the time but writes specifications that are both sound and complete
+  only 52.3% of the time, and lands a full proof on just 4.9% of tasks. Direct
+  autoformalization is worse: the canonical
+  [study](https://arxiv.org/abs/2205.12615) translates only 25.3% of competition problems
+  into a faithful formal statement.
+- **And nothing in that stack checks the statement.** The same autoformalization work
+  names the gap outright: there is no automated system that verifies a translation is
+  correct with high certainty. A prover certifies the proof against the statement; it never
+  certifies the statement against intent.
+
+Popper is built for that gap, and it differs from every LLM-shaped tool around it in kind,
+not degree. It does not generate a proof, write a spec, or read-and-guess. It runs
+executable adversarial checks against the statement and returns a concrete counterexample.
+
+| tool | what it optimizes | representative result | returns a counterexample |
+|---|---|---|---|
+| LLM theorem prover (DeepSeek-Prover-V2, AxiomProver) | a proof, given a statement | 88.9% miniF2F; 120/120 Putnam 2025 | no |
+| LLM spec writer / autoformalizer | a formal statement from intent | 52.3% sound+complete (Verina, o3); 25.3% faithful autoformalization | no |
+| LLM-as-judge | a verdict by reading the spec | guesses, no execution | no |
+| **Popper** | breaking the statement | 99% of planted bugs caught, 0 false alarms | yes, every time |
+
+The provers and the judges all live downstream of a statement they assume is right. Popper
+is the only one of these that attacks that assumption, and the only one that hands back the
+input proving the assumption wrong. That is why it belongs in front of AXLE and
+AxiomProver rather than alongside them.
+
+---
+
 ## System design
 
 Popper is built around one principle: **a cheap, executable falsification signal is worth
