@@ -10,26 +10,26 @@ export const research = String.raw`
 ## The structural gap Popper fills
 
 A prover is a verifier. Given a statement $S$ and a candidate proof $\pi$, an engine
-like AXLE decides whether $\pi : S$ — whether the proof inhabits the type the statement
-denotes. That guarantee is real and it is the foundation everything else rests on. It
-is also blind in two directions at once, and the two blind spots compound.
+like AXLE decides whether $\pi : S$, that is, whether the proof inhabits the type the
+statement denotes. That guarantee is real and it is the foundation everything else rests
+on. It is also blind in two directions at once, and the two blind spots compound.
 
 The first is **faithfulness**. The verifier checks $\pi$ against $S$; it never checks
-$S$ against the author's intent $I$. So whenever $S \neq I$ — the statement is too
-loose, too tight, or vacuous — the prover still certifies a valid $\pi : S$ and reports
-success. You have proved the wrong theorem, soundly. The second is **well-formedness**.
-The verifier only runs once $S$ elaborates. Real input rarely does: typo-heavy Lean,
+$S$ against the author's intent $I$. So whenever $S \neq I$ (the statement is too loose,
+too tight, or vacuous), the prover still certifies a valid $\pi : S$ and reports success.
+You have proved the wrong theorem, soundly. The second is **well-formedness**. The
+verifier only runs once $S$ elaborates. Real input rarely does: typo-heavy Lean,
 references to Mathlib lemmas that were renamed or never existed, a wrong implicit
-argument. AxiomProver does not degrade on this — it fails at the type-checking phase and
+argument. AxiomProver does not degrade on this; it fails at the type-checking phase and
 the mathematical idea behind the malformed term is discarded.
 
 Popper is the layer that addresses both before the prover is ever invoked.
 
 ## Why the gap matters quantitatively
 
-The proving side is strong; the specifying side is not. On Verina — code paired with
-specifications — the strongest general model writes correct *code* roughly 73% of the
-time but writes specs that are simultaneously sound and complete only ~52% of the time.
+The proving side is strong; the specifying side is not. On Verina, code paired with
+specifications, the strongest general model writes correct *code* roughly 73% of the time
+but writes specs that are simultaneously sound and complete only about 52% of the time.
 "Sound" means the spec does not reject a correct answer; "complete" means it does not
 accept a wrong one. The error mass lives in the statement, and the verifier is
 constitutionally unable to see it: it confirms $\pi$ matches $S$, it does not ask whether
@@ -47,28 +47,28 @@ prover as a cheap, fast, fault-tolerant screen and performs three jobs the verif
 cannot.
 
 **1. Intent recovery through noise.** Rather than rejecting malformed input, Popper's
-agent layer infers the claim the author is gesturing at — recovering the statement
-behind the typo, the renamed term, the off-by-one in an implicit argument — and
-reconstructs a checkable $S'$ from it. The failure mode is graceful: when it cannot
-recover intent, it returns INCONCLUSIVE and hands control back, rather than crashing.
+agent layer infers the claim the author is gesturing at, recovering the statement behind
+the typo, the renamed term, the off-by-one in an implicit argument, and reconstructs a
+checkable $S'$ from it. The failure mode is graceful: when it cannot recover intent, it
+returns INCONCLUSIVE and hands control back, rather than crashing.
 
 **2. Syntactic interception.** Parse and elaboration faults are caught and repaired at
-the buffer, so they never reach — and never stall — the expensive multi-agent proof
-loop. The prover only sees statements that already type-check.
+the buffer, so they never reach, and never stall, the expensive multi-agent proof loop.
+The prover only sees statements that already type-check.
 
 **3. Adversarial falsification on the AXLE substrate.** Given a checkable statement,
 Popper runs rapid-fire adversarial probes (on the order of tens of milliseconds each)
 that try to *break* it. For math this is a Monte-Carlo search; for code it is evaluation
 of the spec against known-good and known-bad witnesses on AXLE. When a probe succeeds,
-Popper returns the concrete counterexample — the exact vector, matrix, or graph that
+Popper returns the concrete counterexample: the exact vector, matrix, or graph that
 exposes the weak premise.
 
 ## The falsification engines
 
 **Math.** A statement carries an assumption $A(x)$ and a conclusion $C(x)$; the engine
 draws thousands of random $x$ and checks $A(x) \Rightarrow C(x)$. Gibbs' inequality, for
-instance, says the KL divergence — a standard measure of how far one distribution is
-from another — is never negative:
+instance, says the KL divergence, a standard measure of how far one distribution is from
+another, is never negative:
 $$\mathrm{KL}(p \,\|\, q) = \sum_i p_i \log \frac{p_i}{q_i} \ge 0.$$
 This holds when $q$ is a genuine distribution, but drop the normalization assumption
 $\sum_i q_i = 1$ and it fails; the engine exhibits a $q$ that drives the sum below zero.
@@ -83,7 +83,7 @@ the spec is too tight (UNSOUND); an accepted wrong implementation means it is to
 
 The counterexample is what makes this operational rather than diagnostic. A pass/fail
 bit tells you a spec is *probably* wrong; a counterexample tells you *which input* breaks
-it — which is exactly what is needed to repair it, and which doubles as a clean,
+it, which is exactly what is needed to repair it, and which doubles as a clean,
 automatic training signal for a repair loop with no human in the path.
 
 ## How this changes the AXLE / AxiomProver pipeline
@@ -91,15 +91,15 @@ automatic training signal for a repair loop with no human in the path.
 Place Popper before the prover and the compute profile of the whole stack changes.
 
 - **Vacuous and too-weak specs are screened out for free.** AxiomProver would return a
-  clean proof of $\forall x,\ \text{true}$ or of "sorted means same length" — certifying
+  clean proof of $\forall x,\ \text{true}$ or of "sorted means same length," certifying
   nothing while consuming budget. Popper refutes these in milliseconds, before any proof
   search begins.
 - **Unprovable-by-bug specs stop grinding.** A too-strong or simply wrong spec is
   unprovable; the prover can exhaust a long multi-agent search failing on a statement
   that is false because the *spec* has a defect. Popper returns the breaking witness
   immediately and redirects effort from proof search to spec repair.
-- **The refutation becomes the repair signal.** The loop is: Popper breaks $S$ → the
-  witness repairs it to $S^\star$ → AxiomProver proves $S^\star$ once it survives
+- **The refutation becomes the repair signal.** The loop is: Popper breaks $S$, the
+  witness repairs it to $S^\star$, AxiomProver proves $S^\star$ once it survives
   falsification. Popper keeps the prover's expensive compute on statements that are both
   well-formed and worth proving.
 
@@ -110,8 +110,8 @@ is the input that shows why." They are complementary, not competing.
 ## Three levels of trust
 
 1. A model writes a proof in prose. It reads well and guarantees nothing.
-2. A model plus a prover (Lean or AXLE). You get a real proof that matches the statement
-   — and you are still trusting the statement. $\forall x,\ \text{true}$ proves instantly;
+2. A model plus a prover (Lean or AXLE). You get a real proof that matches the statement,
+   and you are still trusting the statement. $\forall x,\ \text{true}$ proves instantly;
    "sorted" defined as "same length" is satisfied by code that does nothing.
 3. A model plus a prover plus Popper. The proof matches the statement *and* an independent
    oracle has tried to break the statement, either failing or returning the input that
@@ -137,25 +137,25 @@ inputs, so Popper catches them in a couple of draws. Subtle bugs fail on a tiny 
 of inputs, so catching them scales with the draw budget: at 100 draws Popper catches 6 of
 10 subtle bugs; by 10,000 draws it catches all 10. F1 is a real number that moves with
 effort, plotted on the budget chart on the Benchmark tab. The proof checker scores zero
-at every budget — not a weakness but the point, since refuting a bad spec is not an
-operation a proof checker performs. The LLM judge can guess, but never returns the input
-that breaks the spec.
+at every budget, which is not a weakness but the point, since refuting a bad spec is not
+an operation a proof checker performs. The LLM judge can guess, but never returns the
+input that breaks the spec.
 
 ## What Popper adds
 
 1. A checker for the statement, not the proof.
 2. Tolerance for malformed input, where the prover crashes at type-checking.
 3. A counterexample, not a score: the concrete input that breaks the spec.
-4. A clean training signal — the witness that fixes a spec is also a reward.
+4. A clean training signal: the witness that fixes a spec is also a reward.
 5. Honest INCONCLUSIVE when a spec cannot be decided on a case, instead of a guess.
 
 ## Limits
 
 Popper breaks statements; it does not certify them. A FAITHFUL verdict means no
-counterexample was found within the budget, not that none exists — proving the absence of
+counterexample was found within the budget, not that none exists; proving the absence of
 a counterexample is undecidable in general, so Popper never claims it. Random sampling can
 miss a bug that hides on a measure-zero set of inputs, though dropped assumptions and
-flipped directions — the bugs that dominate in practice — fail on a large fraction of
+flipped directions, the bugs that dominate in practice, fail on a large fraction of
 inputs and surface immediately. Intent recovery is best-effort and heuristic, but its
 failure mode is graceful rather than a hard crash. Lean and AXLE remain the final word on
 the proof itself.
