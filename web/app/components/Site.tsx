@@ -72,7 +72,7 @@ export default function Site() {
         {tab === "research" && (
           <section className="section first">
             <h2>
-              Research <span className="sub">a short note on the theory behind Popper</span>
+              Research <span className="sub">the theory and engineering behind Popper</span>
             </h2>
             <Research />
           </section>
