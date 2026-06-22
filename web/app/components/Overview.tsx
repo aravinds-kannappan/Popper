@@ -6,7 +6,7 @@ export default function Overview({ go }: { go: (tab: string) => void }) {
   return (
     <div>
       <section className="hero">
-        <div className="tag">semantic-fault tolerance for formal provers</div>
+        <div className="tag">falsify the statement, then prove it</div>
         <h1>Don&apos;t burn proof compute on a statement that was wrong to begin with</h1>
         <p>
           Provers like AXLE and AxiomProver crash at type-checking on typo-heavy Lean or
