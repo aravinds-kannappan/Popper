@@ -226,6 +226,17 @@ There is one common interface and two falsification engines behind it.
   (Bridge); and a risk card turns it all into a PROVE / REPAIR / REJECT gate (Model
   Eval). See [`reports/scaling.md`](./reports/scaling.md); runs offline, no key.
 
+- **`smt/`** is the exact-falsification engine (M4). Where the samplers search,
+  this one *decides*: for the decidable fragment it returns an exact
+  counterexample or a real certificate of faithfulness instead of "no
+  counterexample within budget". Three backends behind the same `Oracle`
+  interface: integer-box enumeration and Fourier-Motzkin over the rationals (both
+  pure stdlib, exact), and an optional Z3 backend for nonlinear arithmetic
+  (`pip install 'falsify[smt]'`). Paired with `scale/certify.py`, which upgrades a
+  survived sampling run into a Clopper-Pearson bug-rate bound, and
+  `speccheck/typegen.py`, which derives generators from a signature so arbitrary
+  tasks audit with no hand-written fixture. See [`reports/scaling_m4.md`](./reports/scaling_m4.md).
+
 - **`web/`** is the site. A live Popper agent (Opus + AXLE tools), the offline oracle
   benchmark with charts, the audit dashboard, and the research write-up. The agent's
   `check`/`disprove` tools call the same AXLE substrate; keys are server-side only.
@@ -242,7 +253,9 @@ falsify/             the implementation package
   bench/       benchmark: corpus, judges, metrics, runner
   scale/       AI-safety / RLHF principles ported to spec faithfulness (M3):
                adaptive search, reward-hack probe, Safe-RLHF score, debate,
-               judge calibration, eval-card gate
+               judge calibration, eval-card gate; plus (M4) certify (PAC bound)
+               and adversary (learned reward-hack policy, trigger search)
+  smt/         (M4) exact falsification: enum + Fourier-Motzkin + optional Z3
 examples/      runnable scripts (audit_math, audit_verina, verina_live_audit, repair_demo, run_benchmark)
 tests/         unit tests
 reports/       written reports, including benchmark.md and research.md
@@ -358,6 +371,7 @@ python examples/audit_verina.py      # code-spec engine on offline fixtures
 python examples/repair_demo.py       # the repair loop
 python examples/run_benchmark.py     # the benchmark (Popper vs proof-checker baseline)
 python examples/scale_demo.py        # the six AI-safety / RLHF scaling modules
+python examples/exact_demo.py        # M4: exact SMT, PAC certificate, typegen, trained adversary
 python -m unittest discover -s tests -t .   # the tests
 ```
 

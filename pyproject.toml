@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "falsify"
-version = "0.3.0"
+version = "0.5.0"
 description = "Popper — falsify the spec, then verify the proof. An executable spec-faithfulness oracle for math and code, built on AXLE."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -16,6 +16,7 @@ dependencies = []  # core is pure standard library by design
 [project.optional-dependencies]
 live = ["axiom-axle"]      # live AXLE audit (Lean checking over the API)
 llm = ["anthropic"]        # LLM-driven declarative spec repair (M2 → live)
+smt = ["z3-solver"]        # optional Z3 backend for nonlinear exact falsification (M4)
 dev = ["pytest"]
 
 [project.urls]
@@ -28,6 +29,7 @@ falsify-audit-code = "examples.audit_verina:main"
 falsify-repair = "examples.repair_demo:main"
 falsify-verina-live = "examples.verina_live_audit:main"
 falsify-scale = "examples.scale_demo:main"
+falsify-exact = "examples.exact_demo:main"
 
 [tool.setuptools.packages.find]
 include = ["falsify*"]

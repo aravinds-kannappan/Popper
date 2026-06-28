@@ -76,6 +76,8 @@ class SearchResult:
     witness: Optional[Instance] = None
     iterations: int = 0
     history: list[float] = field(default_factory=list)  # best margin per iteration
+    proposal_mean: Optional[list] = None   # converged CEM proposal mean (per latent coord)
+    proposal_std: Optional[list] = None    # converged CEM proposal std (per latent coord)
 
 
 def _clamp01(x: float) -> float:
@@ -152,7 +154,8 @@ class AdaptiveFalsifier:
                     best, best_inst = m, inst
                 if m < -EPS:
                     history.append(best)
-                    return SearchResult(True, used, m, inst, iterations=iters, history=history)
+                    return SearchResult(True, used, m, inst, iterations=iters, history=history,
+                                        proposal_mean=list(mean), proposal_std=list(std))
                 samples.append((m, u, inst))
 
             history.append(best)
@@ -166,7 +169,8 @@ class AdaptiveFalsifier:
                 std[j] = max(self.std_floor,
                              self.smooth * math.sqrt(ev) + (1 - self.smooth) * std[j])
 
-        return SearchResult(False, used, best, best_inst, iterations=iters, history=history)
+        return SearchResult(False, used, best, best_inst, iterations=iters, history=history,
+                            proposal_mean=list(mean), proposal_std=list(std))
 
 
 # --------------------------------------------------------------------------- #

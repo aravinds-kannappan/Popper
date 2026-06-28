@@ -33,9 +33,20 @@ from .scale import (
     DebateTranscript, run_debate,
     JudgeCalibration, calibrate_judge, ensemble_verdict,
     EvalCard, GateDecision, build_eval_card,
+    BugRateBound, bug_rate_upper_bound, weighted_bug_rate_bound, certify_result,
+    AdaptiveHackPolicy, WitnessMemory, TriggerStructure, family_of, FAMILIES,
+    probe_reward_hacks_learned, naive_evaluations, conjunctive_trigger_search,
+)
+from .smt import (
+    Var, SymbolicClaim, symbolic_library, LinCon, con, fm_solve,
+    SMTOracle, EnumBackend, LinearBackend, Z3Backend, default_backends,
+)
+from .speccheck.typegen import (
+    TInt, TNat, TBool, TList, TTuple, gen, enumerate_small,
+    parse_signature, gen_inputs_for, small_inputs_for, GeneratedInputs,
 )
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 __all__ = [
     "Oracle", "OracleResult", "Verdict",
@@ -54,4 +65,13 @@ __all__ = [
     "DebateTranscript", "run_debate",
     "JudgeCalibration", "calibrate_judge", "ensemble_verdict",
     "EvalCard", "GateDecision", "build_eval_card",
+    "BugRateBound", "bug_rate_upper_bound", "weighted_bug_rate_bound", "certify_result",
+    "AdaptiveHackPolicy", "WitnessMemory", "TriggerStructure", "family_of", "FAMILIES",
+    "probe_reward_hacks_learned", "naive_evaluations", "conjunctive_trigger_search",
+    # falsify.smt - exact falsification (M4 idea 1)
+    "Var", "SymbolicClaim", "symbolic_library", "LinCon", "con", "fm_solve",
+    "SMTOracle", "EnumBackend", "LinearBackend", "Z3Backend", "default_backends",
+    # falsify.speccheck.typegen - type-directed generation (M4 idea 2)
+    "TInt", "TNat", "TBool", "TList", "TTuple", "gen", "enumerate_small",
+    "parse_signature", "gen_inputs_for", "small_inputs_for", "GeneratedInputs",
 ]

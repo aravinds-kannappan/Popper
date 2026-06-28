@@ -35,6 +35,13 @@ from .constrained import FaithfulnessScore, score_task, SAFE_THRESHOLD
 from .debate import DebateTranscript, run_debate
 from .calibration import JudgeCalibration, calibrate_judge, ensemble_verdict
 from .evalcard import EvalCard, GateDecision, build_eval_card
+from .certify import (
+    BugRateBound, bug_rate_upper_bound, weighted_bug_rate_bound, certify_result,
+)
+from .adversary import (
+    AdaptiveHackPolicy, WitnessMemory, TriggerStructure, family_of, FAMILIES,
+    probe_reward_hacks_learned, naive_evaluations, conjunctive_trigger_search,
+)
 
 __all__ = [
     "ScoredClaim", "SearchResult", "UniformFalsifier", "AdaptiveFalsifier",
@@ -44,4 +51,9 @@ __all__ = [
     "DebateTranscript", "run_debate",
     "JudgeCalibration", "calibrate_judge", "ensemble_verdict",
     "EvalCard", "GateDecision", "build_eval_card",
+    # M4 idea 1b: statistical certificate
+    "BugRateBound", "bug_rate_upper_bound", "weighted_bug_rate_bound", "certify_result",
+    # M4 idea 3: a trained adversary
+    "AdaptiveHackPolicy", "WitnessMemory", "TriggerStructure", "family_of", "FAMILIES",
+    "probe_reward_hacks_learned", "naive_evaluations", "conjunctive_trigger_search",
 ]
