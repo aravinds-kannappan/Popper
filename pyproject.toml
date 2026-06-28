@@ -27,6 +27,7 @@ falsify-audit-math = "examples.audit_math:main"
 falsify-audit-code = "examples.audit_verina:main"
 falsify-repair = "examples.repair_demo:main"
 falsify-verina-live = "examples.verina_live_audit:main"
+falsify-scale = "examples.scale_demo:main"
 
 [tool.setuptools.packages.find]
 include = ["falsify*"]

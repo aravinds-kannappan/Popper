@@ -1,0 +1,86 @@
+{
+  "budget": 20000,
+  "seeds": 12,
+  "results": [
+    {
+      "claim": "rare_edge_p0.05",
+      "gold": "FALSIFIED",
+      "trigger_prob": "see-name",
+      "uniform_found": "12/12",
+      "uniform_mean_draws": 16.2,
+      "adaptive_found": "12/12",
+      "adaptive_mean_draws": 14.8,
+      "speedup": 1.1
+    },
+    {
+      "claim": "rare_edge_p0.01",
+      "gold": "FALSIFIED",
+      "trigger_prob": "see-name",
+      "uniform_found": "12/12",
+      "uniform_mean_draws": 69.9,
+      "adaptive_found": "12/12",
+      "adaptive_mean_draws": 20.8,
+      "speedup": 3.4
+    },
+    {
+      "claim": "rare_edge_p0.002",
+      "gold": "FALSIFIED",
+      "trigger_prob": "see-name",
+      "uniform_found": "12/12",
+      "uniform_mean_draws": 363.7,
+      "adaptive_found": "12/12",
+      "adaptive_mean_draws": 21.8,
+      "speedup": 16.7
+    },
+    {
+      "claim": "rare_edge_p0.0005",
+      "gold": "FALSIFIED",
+      "trigger_prob": "see-name",
+      "uniform_found": "12/12",
+      "uniform_mean_draws": 1901.6,
+      "adaptive_found": "12/12",
+      "adaptive_mean_draws": 21.8,
+      "speedup": 87.4
+    },
+    {
+      "claim": "rare_edge_p0.0001",
+      "gold": "FALSIFIED",
+      "trigger_prob": "see-name",
+      "uniform_found": "12/12",
+      "uniform_mean_draws": 7236.7,
+      "adaptive_found": "12/12",
+      "adaptive_mean_draws": 22.1,
+      "speedup": 327.7
+    },
+    {
+      "claim": "needle_dim3",
+      "gold": "FALSIFIED",
+      "trigger_prob": "see-name",
+      "uniform_found": "12/12",
+      "uniform_mean_draws": 104,
+      "adaptive_found": "12/12",
+      "adaptive_mean_draws": 121.5,
+      "speedup": 0.9
+    },
+    {
+      "claim": "needle_dim5",
+      "gold": "FALSIFIED",
+      "trigger_prob": "see-name",
+      "uniform_found": "12/12",
+      "uniform_mean_draws": 3131.5,
+      "adaptive_found": "12/12",
+      "adaptive_mean_draws": 522.7,
+      "speedup": 6.0
+    },
+    {
+      "claim": "rare_edge_faithful",
+      "gold": "FAITHFUL",
+      "trigger_prob": null,
+      "uniform_found": "0/12",
+      "uniform_mean_draws": 20000,
+      "adaptive_found": "0/12",
+      "adaptive_mean_draws": 20000,
+      "speedup": null
+    }
+  ]
+}

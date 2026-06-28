@@ -215,6 +215,17 @@ There is one common interface and two falsification engines behind it.
 - **`bench/`** is the benchmark harness. `corpus.py` (the labelled set), `judges.py`
   (Popper, the proof-checker baseline, the LLM judge), `metrics.py`, and `run.py`.
 
+- **`scale/`** ports six AI-safety / RLHF results into the same faithfulness
+  surface, because a reward model is a spec and a too-weak reward is a spec that
+  accepts wrong answers. Adaptive (Cross-Entropy-Method) search finds rare-trigger
+  spec bugs with up to ~300x fewer draws than uniform sampling (Sleeper Agents);
+  an active reward-hack probe searches for a spec-gaming implementation rather than
+  enumerating one (Reward Hacking); a reward/cost score makes the verdict a tunable
+  RL signal (Safe RLHF); a debate loop recovers the missing premise (Scalable
+  Debate); a calibrated ensemble anchors the LLM judge to the executable oracle
+  (Bridge); and a risk card turns it all into a PROVE / REPAIR / REJECT gate (Model
+  Eval). See [`reports/scaling.md`](./reports/scaling.md); runs offline, no key.
+
 - **`web/`** is the site. A live Popper agent (Opus + AXLE tools), the offline oracle
   benchmark with charts, the audit dashboard, and the research write-up. The agent's
   `check`/`disprove` tools call the same AXLE substrate; keys are server-side only.
@@ -229,6 +240,9 @@ falsify/             the implementation package
   live/        the live AXLE substrate (axle.py) + Verina driver (verina.py)
   repair/      (M2) counterexample-driven repair loop
   bench/       benchmark: corpus, judges, metrics, runner
+  scale/       AI-safety / RLHF principles ported to spec faithfulness (M3):
+               adaptive search, reward-hack probe, Safe-RLHF score, debate,
+               judge calibration, eval-card gate
 examples/      runnable scripts (audit_math, audit_verina, verina_live_audit, repair_demo, run_benchmark)
 tests/         unit tests
 reports/       written reports, including benchmark.md and research.md
@@ -343,6 +357,7 @@ python examples/audit_math.py        # math engine on an information-theory ladd
 python examples/audit_verina.py      # code-spec engine on offline fixtures
 python examples/repair_demo.py       # the repair loop
 python examples/run_benchmark.py     # the benchmark (Popper vs proof-checker baseline)
+python examples/scale_demo.py        # the six AI-safety / RLHF scaling modules
 python -m unittest discover -s tests -t .   # the tests
 ```
 

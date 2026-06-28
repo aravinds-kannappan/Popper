@@ -25,8 +25,17 @@ from .repair.repair import (
     RepairTrace, Repairer, TemplateRepairer, FunctionalSpecRepairer,
     ChainRepairer, default_repairer, repair_loop, LLMRepairer,
 )
+from .scale import (
+    ScoredClaim, SearchResult, UniformFalsifier, AdaptiveFalsifier,
+    AdaptiveOracle, sleeper_claims,
+    RewardHackReport, hacker_candidates, probe_reward_hacks,
+    FaithfulnessScore, score_task, SAFE_THRESHOLD,
+    DebateTranscript, run_debate,
+    JudgeCalibration, calibrate_judge, ensemble_verdict,
+    EvalCard, GateDecision, build_eval_card,
+)
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "Oracle", "OracleResult", "Verdict",
@@ -37,4 +46,12 @@ __all__ = [
     "AxleClient", "VerinaTask", "list_task_ids", "load_task", "run_live_audit",
     "RepairTrace", "Repairer", "TemplateRepairer", "FunctionalSpecRepairer",
     "ChainRepairer", "default_repairer", "repair_loop", "LLMRepairer",
+    # falsify.scale - AI-safety / RLHF principles ported to spec faithfulness
+    "ScoredClaim", "SearchResult", "UniformFalsifier", "AdaptiveFalsifier",
+    "AdaptiveOracle", "sleeper_claims",
+    "RewardHackReport", "hacker_candidates", "probe_reward_hacks",
+    "FaithfulnessScore", "score_task", "SAFE_THRESHOLD",
+    "DebateTranscript", "run_debate",
+    "JudgeCalibration", "calibrate_judge", "ensemble_verdict",
+    "EvalCard", "GateDecision", "build_eval_card",
 ]
